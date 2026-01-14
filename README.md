@@ -11,7 +11,7 @@ This repository is content-only. It contains detection rules, validation metadat
 - Rules are based on explicitly observable behavior
 - Rules may originate from automation but are human-reviewed
 
----
+----
 
 ## Rule Standards
 
