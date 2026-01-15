@@ -1,0 +1,32 @@
+title: Intrusion Connection with Ransomware Gangs
+id: null
+status: experimental
+level: high
+tags:
+  - attack.execution
+  - attack.t1203
+  - attack.t1059.001
+  - attack.t1486
+  - attack.t1071
+logsource:
+  category: process_creation
+  product: windows
+  service: system
+detection:
+  selection:
+    Image|endswith: 
+      - .exe
+      - .dll
+    CommandLine|contains:
+      - C:\\Users\\Public\\Music\\WakeWordEngine.dll
+      - C:\\Users\\Public\\Documents\\ransomware_payload.exe
+  additional_conditions:
+    ParentImage|endswith: 
+      - powershell.exe
+      - cmd.exe
+    NetworkConnection|is: true
+  condition: selection and additional_conditions
+description: Detects behaviors associated with the connection of intrusion activities
+  to major ransomware groups, focusing on suspicious executable creations, network
+  communications, and the use of common scripting tools for execution.
+rule_index: 1
