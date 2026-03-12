@@ -1,6 +1,6 @@
 # Huntable-SIGMA-Rules
-Curated, high-signal Sigma detection rules crafted by the workflow from Huntable CTI Studio
- rules derived from threat intelligence analysis and manual review.
+Curated Sigma detection rules crafted by the workflow from Huntable CTI Studio.
+ Rules derived from threat intelligence analysis and manual review.
 
 This repository is content-only. It contains detection rules, validation metadata, and supporting CI — not application code.
 
