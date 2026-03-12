@@ -1,0 +1,26 @@
+title: Detect DNS Queries Initiated by vbc.exe via Sysmon EventCode 22
+id: 5d1f3e2a-8f4b-4b1a-9d5e-2f7a1c6e8b3d
+status: experimental
+description: Detects DNS queries initiated by the Visual Basic command line compiler (vbc.exe)
+  using Sysmon EventCode 22, which is unusual behavior potentially indicating malicious
+  activity, as described in Splunk's Lokibot .NET steganography loader analysis.
+references:
+  - https://www.splunk.com/en_us/blog/security/updated-net-steganography-loader-lokibot-malware-analysis.html
+author: Huntable
+date: 2026-03-09
+tags:
+  - attack.t1071.004
+  - attack.execution
+  - attack.persistence
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventCode: 22
+    Image|endswith: \\vbc.exe
+  condition: selection
+falsepositives:
+  - Legitimate use of Visual Basic compiler in development or build environments
+  - Administrative or automated scripting processes invoking vbc.exe
+level: medium
