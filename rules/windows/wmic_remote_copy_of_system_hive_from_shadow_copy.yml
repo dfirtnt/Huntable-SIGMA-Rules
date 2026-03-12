@@ -1,0 +1,27 @@
+title: WMIC Remote Copy of SYSTEM Hive From Shadow Copy
+id: 7b3f2f5b-5d1b-4e5e-9f9d-6a6e3d3d7c7a
+description: >-
+  Detects the WMIC remote process creation command explicitly cited in reporting,
+  where cmd.exe copies the SYSTEM registry hive from a volume shadow copy to
+  C:\users\public.
+references:
+  - 'https://research.checkpoint.com/2026/handala-hack-unveiling-groups-modus-operandi/'
+author: 'Huntable'
+logsource:
+  category: process_creation
+  product: windows
+  service: wmic
+  definition: 'Windows Management Instrumentation Command-line (WMIC)'
+detection:
+  selection:
+    CommandLine|contains:
+      - 'wmic.exe /node:'
+      - 'process call create'
+      - 'cmd.exe /c copy'
+      - '\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\windows\system32\config\system'
+      - 'c:\users\public'
+  condition: selection
+falsepositives:
+  - 'Administrative WMIC remote execution activity'
+  - 'Administrative collection or backup activity involving volume shadow copies and registry hives'
+level: high

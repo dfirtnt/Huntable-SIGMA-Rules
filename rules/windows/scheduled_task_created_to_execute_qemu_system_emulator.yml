@@ -1,0 +1,34 @@
+title: Scheduled Task Created to Execute QEMU System Emulator
+id: 7f8a9c3d-4e2b-4a1c-9f5e-6d8c7b9a2e1f
+status: experimental
+description: Detects creation of a scheduled task that executes QEMU system emulator, potentially used by threat actors for persistence and maintaining access
+references:
+  - Internal threat intelligence report
+author: Cybersecurity Detection Engineer
+date: 2024/01/15
+modified: 2024/01/15
+tags:
+  - attack.persistence
+  - attack.t1053.005
+  - attack.defense_evasion
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith: '\schtasks.exe'
+    Image|endswith: '\qemu-system-x86_64.exe'
+  selection_cmdline:
+    CommandLine|contains|all:
+      - '/CREATE'
+      - '/RU'
+      - 'SYSTEM'
+      - '/SC'
+      - 'ONSTART'
+      - '/TN'
+      - 'qemu-system-x86_64.exe'
+  condition: selection_parent or selection_cmdline
+falsepositives:
+  - Legitimate use of QEMU for virtualization or testing purposes
+  - Authorized system administration activities
+level: high
