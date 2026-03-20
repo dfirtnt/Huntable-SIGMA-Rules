@@ -1,0 +1,22 @@
+title: PowerShell-Initiated Curl Google Drive Payload Download
+id: b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6
+status: experimental
+description: Detects PowerShell invoking curl.exe to download a payload from a Google Drive link as seen in SILENTCONNECT activity.
+references:
+  - https://www.elastic.co/security-labs/silentconnect-delivers-screenconnect
+author: Huntable CTI Studio User
+tags:
+  - attack.t1071
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    process_name: curl.exe
+    parent_process_name: powershell.exe
+    process_command_line: '*drive.google.com/uc?id=*&export=download*'
+  condition: selection
+falsepositives:
+  - Administrative scripts using curl.exe for legitimate file retrieval
+  - Automated software deployment fetching artifacts via curl
+level: high
