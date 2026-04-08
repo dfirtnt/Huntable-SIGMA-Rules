@@ -1,0 +1,20 @@
+title: PowerShell Used to Stop Virtual Machines for RansomHub Deployment
+description: Detects PowerShell commands used to enumerate and stop virtual machines,
+  excluding specified names, consistent with ransomware impact operations.
+id: 49d7f465-7d80-4f7f-b7f3-582b51a0aca5
+tags:
+- attack.impact
+- attack.t1489
+level: high
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    parent_image|endswith: \cmd.exe
+    image|endswith: \powershell.exe
+    command_line|contains|all:
+    - Get-VM
+    - Stop-VM
+  condition: selection

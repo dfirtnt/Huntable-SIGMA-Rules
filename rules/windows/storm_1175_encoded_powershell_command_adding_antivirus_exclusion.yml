@@ -1,0 +1,22 @@
+title: Storm-1175 Encoded PowerShell Command Adding Antivirus Exclusion
+description: Detects encoded PowerShell commands adding C:\ drive to antivirus exclusion
+  path, indicating defense evasion by Storm-1175.
+id: 3c4d5e6f-7a8b-4901-cdef-34567890abcd
+tags:
+- attack.t1562.001
+- attack.t1089
+level: critical
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith:
+    - \powershell.exe
+    CommandLine|contains|all:
+    - -EncodedCommand
+    - Add-MpPreference
+    - ExclusionPath
+    - C:\\
+  condition: selection
