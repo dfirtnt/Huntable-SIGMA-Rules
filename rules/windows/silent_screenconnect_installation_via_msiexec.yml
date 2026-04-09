@@ -1,0 +1,23 @@
+title: Silent ScreenConnect Installation via Msiexec
+id: 4c936e3f-dc58-4f02-9ead-2e7fedcb8973
+status: experimental
+description: Detects PowerShell invoking msiexec.exe to silently install the ScreenConnect client.
+references:
+  - https://www.elastic.co/security-labs/silentconnect-delivers-screenconnect
+author: Huntable CTI Studio User
+date: 2026/03/27
+tags:
+  - attack.t1203
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\\msiexec.exe'
+    CommandLine: '* /i C:\\Temp\\ScreenConnect.ClientSetup.msi*'
+  condition: selection
+falsepositives:
+  - Administrative MSI deployments (e.g., IT software distribution and endpoint provisioning)
+  - Helpdesk or remote support client installation initiated by administrators
+  - Test/lab environments or scripted installation workflows that stage MSI files in temporary directories
+level: high
