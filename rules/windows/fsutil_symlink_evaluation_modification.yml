@@ -1,0 +1,21 @@
+title: FSUtil Symlink Evaluation Modification
+description: Detects fsutil command execution modifying symlink evaluation settings,
+  which can enable lateral movement or evasion behaviors.
+id: 3fbdca14-e78a-4fae-bae2-bf72478c1803
+tags:
+- attack.defense_evasion
+- attack.t1562
+level: medium
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    parent_image|endswith: \cmd.exe
+    image|endswith: \fsutil.exe
+    command_line|contains|all:
+    - behavior
+    - set
+    - SymlinkEvaluation
+  condition: selection
