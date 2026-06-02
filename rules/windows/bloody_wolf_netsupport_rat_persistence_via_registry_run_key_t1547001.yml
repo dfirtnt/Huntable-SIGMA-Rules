@@ -1,0 +1,24 @@
+title: 'Bloody Wolf: NetSupport RAT Persistence via Registry Run Key (T1547.001)'
+description: Detects the Bloody Wolf campaign adding NetSupport RAT or related executables to the HKCU Run registry key for persistence using cmd.exe and reg.exe
+id: 7a3f8c21-4b9e-4d12-a8f1-2e5c6d7b8e9f
+tags:
+  - attack.persistence
+  - attack.t1547.001
+level: high
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|contains: "reg add"
+    CommandLine|contains: "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+    CommandLine|contains: "/t REG_SZ"
+  condition: selection
+references:
+  - https://www.group-ib.com/blog/bloody-wolf/
+author: Huntable CTI Studio User
+date: 2023/10/15
+falsepositives:
+  - Administrative use of registry editing tools
+  - Legitimate software deployment scripts
