@@ -1,0 +1,24 @@
+title: Qbot Esentutl WebCache Collection
+id: e5c8c8e2-dfea-4f46-b217-7b769fbf3a4f
+status: experimental
+description: Detects esentutl.exe used with /r V01 against a user's WebCache directory, as seen in Qbot browser data collection
+references:
+  - https://thedfirreport.com/2022/02/07/qbot-likes-to-move-it-move-it/
+author: Huntable CTI Studio User
+tags:
+  - attack.collection
+  - attack.t1119
+level: medium
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\\esentutl.exe'
+  selection_cli:
+    CommandLine|contains|all:
+      - '/r V01'
+      - '\\AppData\\Local\\Microsoft\\Windows\\WebCache'
+  condition: selection_image and selection_cli
+falsepositives:
+  - Administrative use of esentutl for database repair or maintenance
