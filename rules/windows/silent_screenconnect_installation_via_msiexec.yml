@@ -13,8 +13,8 @@ logsource:
   product: windows
 detection:
   selection:
-    Image|endswith: '\\msiexec.exe'
-    CommandLine: '* /i C:\\Temp\\ScreenConnect.ClientSetup.msi*'
+    Image|endswith: '\msiexec.exe'
+    CommandLine: '* /i C:\Temp\ScreenConnect.ClientSetup.msi*'
   condition: selection
 falsepositives:
   - Administrative MSI deployments (e.g., IT software distribution and endpoint provisioning)

@@ -14,11 +14,11 @@ logsource:
   product: windows
 detection:
   selection_image:
-    Image|endswith: '\\esentutl.exe'
+    Image|endswith: '\esentutl.exe'
   selection_cli:
     CommandLine|contains|all:
       - '/r V01'
-      - '\\AppData\\Local\\Microsoft\\Windows\\WebCache'
+      - '\AppData\Local\Microsoft\Windows\WebCache'
   condition: selection_image and selection_cli
 falsepositives:
   - Administrative use of esentutl for database repair or maintenance

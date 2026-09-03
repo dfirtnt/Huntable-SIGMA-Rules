@@ -8,13 +8,18 @@ description: >-
 references:
   - 'https://research.checkpoint.com/2026/handala-hack-unveiling-groups-modus-operandi/'
 author: 'Huntable'
+tags:
+  - attack.credential-access
+  - attack.t1003.002
+  - attack.execution
+  - attack.t1047
 logsource:
   category: process_creation
   product: windows
   definition: 'Windows Management Instrumentation Command-line (WMIC)'
 detection:
   selection:
-    CommandLine|contains:
+    CommandLine|contains|all:
       - 'wmic.exe /node:'
       - 'process call create'
       - 'cmd.exe /c copy'

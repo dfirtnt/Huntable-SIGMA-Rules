@@ -14,7 +14,7 @@ detection:
   selection:
     Image|endswith:
     - \net.exe
-    CommandLine|contains:
+    CommandLine|contains|all:
     - user
     - add
   condition: selection
