@@ -7,7 +7,7 @@ description: Detects use of powercfg.exe to disable hibernate or standby timeout
 references:
   - https://securelist.com/video-books-pirates-miners-rat/119943/
 author: Huntable CTI Studio - Andrew Skatoff
-date: 2026/06/02
+date: 2026-06-02
 tags:
   - attack.impact
   - attack.t1496

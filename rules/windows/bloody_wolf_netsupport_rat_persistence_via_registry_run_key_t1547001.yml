@@ -4,6 +4,7 @@ id: 7a3f8c21-4b9e-4d12-a8f1-2e5c6d7b8e9f
 tags:
   - attack.persistence
   - attack.t1547.001
+  - attack.privilege-escalation
 level: high
 status: experimental
 logsource:
@@ -19,7 +20,7 @@ detection:
 references:
   - https://www.group-ib.com/blog/bloody-wolf/
 author: Huntable CTI Studio User
-date: 2023/10/15
+date: 2023-10-15
 falsepositives:
   - Administrative use of registry editing tools
   - Legitimate software deployment scripts

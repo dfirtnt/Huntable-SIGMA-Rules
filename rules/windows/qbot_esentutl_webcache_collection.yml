@@ -5,6 +5,7 @@ description: Detects esentutl.exe used with /r V01 against a user's WebCache dir
 references:
   - https://thedfirreport.com/2022/02/07/qbot-likes-to-move-it-move-it/
 author: Huntable CTI Studio User
+date: 2026-06-05
 tags:
   - attack.collection
   - attack.t1119
@@ -14,11 +15,11 @@ logsource:
   product: windows
 detection:
   selection_image:
-    Image|endswith: '\\esentutl.exe'
+    Image|endswith: '\esentutl.exe'
   selection_cli:
     CommandLine|contains|all:
       - '/r V01'
-      - '\\AppData\\Local\\Microsoft\\Windows\\WebCache'
+      - '\AppData\Local\Microsoft\Windows\WebCache'
   condition: selection_image and selection_cli
 falsepositives:
   - Administrative use of esentutl for database repair or maintenance

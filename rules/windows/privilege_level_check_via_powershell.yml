@@ -5,7 +5,7 @@ description: Detects PowerShell command executed via cmd.exe to check the privil
 references:
   - https://thedfirreport.com/2025/07/14/kongtuke-filefix-leads-to-new-interlock-rat-variant/
 author: Huntable CTI Studio User
-date: 2026/05/29
+date: 2026-05-29
 tags:
   - attack.discovery
   - attack.t1087
