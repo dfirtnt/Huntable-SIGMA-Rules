@@ -11,9 +11,10 @@ logsource:
   product: windows
 detection:
   selection:
-    CommandLine|contains: "reg add"
-    CommandLine|contains: "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    CommandLine|contains: "/t REG_SZ"
+    CommandLine|contains|all:
+      - "reg add"
+      - "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+      - "/t REG_SZ"
   condition: selection
 references:
   - https://www.group-ib.com/blog/bloody-wolf/

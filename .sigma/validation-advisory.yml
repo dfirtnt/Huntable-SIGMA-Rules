@@ -1,0 +1,59 @@
+# ADVISORY validators -- reported in the CI log for the reviewer, never block.
+#
+# Everything not in validation-blocking.yml, minus checks that encode the
+# SigmaHQ *repository layout* (filename prefixes, folder-based status/tag
+# rules) which this repo does not follow.
+#
+# Why attacktag is advisory and not blocking: pySigma bundles MITRE ATT&CK
+# v19.2, which retired the `defense-evasion` tactic and moved several
+# technique IDs. SigmaHQ and the Sigma specification still use the pre-v19
+# names, so the validator flags tags that are correct for every consumer of
+# these rules. Promote it to blocking only once the ecosystem catches up.
+validators:
+  - all
+  # --- blocking set (already enforced; keep out of the advisory noise) ---
+  - -dangling_condition
+  - -dangling_detection
+  - -them_condition_with_single_detection
+  - -sigmahq_missing_asterisk_condition
+  - -sigmahq_ofselection_condition
+  - -sigmahq_ofthem_condition
+  - -identifier_existence
+  - -identifier_uniqueness
+  - -duplicate_title
+  - -duplicate_filename
+  - -sigmahq_description_existence
+  - -sigmahq_level_existence
+  - -sigmahq_status_existence
+  - -sigmahq_invalid_fieldname
+  - -sigmahq_fieldname_cast
+  - -sigmahq_unknown_field
+  - -sigmahq_space_field_name
+  - -custom_attributes
+  - -sigmahq_logsource_unknown
+  - -sigmahq_sysmon_missing_eventid
+  - -sigmahq_category_event_id
+  - -sigmahq_category_windows_provider_name
+  - -sigmahq_redundant_field
+  - -sigmahq_fields_existence
+  - -invalid_modifier_combinations
+  - -sigmahq_invalid_all_modifier
+  - -sigmahq_invalid_hash_kv
+  - -sigmahq_field_duplicate_value
+  - -sigmahq_unsupported_regex_group_construct
+  - -control_character
+  - -double_wildcard
+  - -tag_format
+  - -namespace_tag
+  - -duplicate_tag
+  - -sigmahq_tags_unique_detection
+  - -sigmahq_tags_unique_tlp
+  # --- SigmaHQ repository-layout conventions this repo does not follow ---
+  - -sigmahq_filename_prefix
+  - -sigmahq_filename_convention
+  - -sigmahq_correlation_filename_prefix
+  - -sigmahq_status
+  - -sigmahq_tags_detection
+  - -sigmahq_github_link
+
+exclusions: {}

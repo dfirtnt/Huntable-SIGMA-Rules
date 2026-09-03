@@ -1,0 +1,11 @@
+# Syntax-level YAML lint only. Style (line length, indentation of sequences)
+# is not gated: rules arrive from CTI Studio's generator and are reviewed by
+# a human, and `sigma check` already proves the YAML loads as a Sigma rule.
+extends: relaxed
+
+rules:
+  line-length: disable
+  new-line-at-end-of-file: enable
+  key-duplicates: enable
+  document-start: disable
+  truthy: disable

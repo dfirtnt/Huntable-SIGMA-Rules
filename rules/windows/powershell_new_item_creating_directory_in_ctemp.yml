@@ -13,8 +13,8 @@ logsource:
   product: windows
 detection:
   selection:
-    process_name: powershell.exe
-    process_command_line: '*New-Item -ItemType Directory -Path ''C:\Temp'' -Force*'
+    Image|endswith: \powershell.exe
+    CommandLine|contains: New-Item -ItemType Directory -Path 'C:\Temp' -Force
   condition: selection
 falsepositives:
   - "Administrative scripts or installers that intentionally create C:\\Temp directories"

@@ -12,9 +12,11 @@ logsource:
   product: windows
 detection:
   selection:
-    process_name: curl.exe
-    parent_process_name: powershell.exe
-    process_command_line: '*drive.google.com/uc?id=*&export=download*'
+    Image|endswith: \curl.exe
+    ParentImage|endswith: \powershell.exe
+    CommandLine|contains|all:
+      - drive.google.com/uc?id=
+      - '&export=download'
   condition: selection
 falsepositives:
   - Administrative scripts using curl.exe for legitimate file retrieval
