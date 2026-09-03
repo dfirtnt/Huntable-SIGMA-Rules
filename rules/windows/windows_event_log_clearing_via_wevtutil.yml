@@ -12,9 +12,9 @@ logsource:
   product: windows
 detection:
   selection:
-    parent_image|endswith: \cmd.exe
-    image|endswith: \wevtutil.exe
-    command_line|contains|any:
+    ParentImage|endswith: \cmd.exe
+    Image|endswith: \wevtutil.exe
+    CommandLine|contains:
     - cl security
     - cl system
     - cl application
