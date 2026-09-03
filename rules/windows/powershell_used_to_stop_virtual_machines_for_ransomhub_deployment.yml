@@ -12,9 +12,9 @@ logsource:
   product: windows
 detection:
   selection:
-    parent_image|endswith: \cmd.exe
-    image|endswith: \powershell.exe
-    command_line|contains|all:
+    ParentImage|endswith: \cmd.exe
+    Image|endswith: \powershell.exe
+    CommandLine|contains|all:
     - Get-VM
     - Stop-VM
   condition: selection

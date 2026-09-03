@@ -17,8 +17,8 @@ logsource:
   service: sysmon
 detection:
   selection:
-    EventCode: 22
-    Image|endswith: \\vbc.exe
+    EventID: 22
+    Image|endswith: \vbc.exe
   condition: selection
 falsepositives:
   - Legitimate use of Visual Basic compiler in development or build environments
