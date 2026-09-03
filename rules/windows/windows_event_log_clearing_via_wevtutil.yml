@@ -2,8 +2,10 @@ title: Windows Event Log Clearing via Wevtutil
 description: Detects commands using Wevtutil to clear Windows audit logs such as Security,
   System, or Application.
 id: 50299664-6bc8-499d-9d88-0a7f8571ea75
+author: Huntable CTI Studio
+date: 2026-04-08
 tags:
-- attack.defense_evasion
+- attack.defense-evasion
 - attack.t1070.001
 level: high
 status: experimental

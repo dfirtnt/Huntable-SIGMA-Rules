@@ -5,9 +5,10 @@ description: Detects PowerShell invoking msiexec.exe to silently install the Scr
 references:
   - https://www.elastic.co/security-labs/silentconnect-delivers-screenconnect
 author: Huntable CTI Studio User
-date: 2026/03/27
+date: 2026-03-27
 tags:
   - attack.t1203
+  - attack.execution
 logsource:
   category: process_creation
   product: windows

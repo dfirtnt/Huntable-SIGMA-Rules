@@ -4,9 +4,11 @@ description: Detects PowerShell ScriptBlock logging capturing a decoded -Encoded
   defense evasion by Storm-1175. A process_creation CommandLine only ever shows the
   base64 blob, so this targets the decoded ScriptBlockText instead.
 id: 3c4d5e6f-7a8b-4901-cdef-34567890abcd
+author: Huntable CTI Studio
+date: 2026-04-08
 tags:
 - attack.t1562.001
-- attack.t1089
+- attack.defense-evasion
 level: critical
 status: experimental
 logsource:

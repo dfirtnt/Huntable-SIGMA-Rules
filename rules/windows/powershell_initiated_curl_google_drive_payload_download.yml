@@ -5,8 +5,10 @@ description: Detects PowerShell invoking curl.exe to download a payload from a G
 references:
   - https://www.elastic.co/security-labs/silentconnect-delivers-screenconnect
 author: Huntable CTI Studio User
+date: 2026-03-20
 tags:
   - attack.t1071
+  - attack.command-and-control
 logsource:
   category: process_creation
   product: windows

@@ -8,6 +8,7 @@ description: >-
 references:
   - 'https://research.checkpoint.com/2026/handala-hack-unveiling-groups-modus-operandi/'
 author: 'Huntable'
+date: 2026-03-12
 tags:
   - attack.credential-access
   - attack.t1003.002

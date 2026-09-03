@@ -2,9 +2,15 @@ title: Storm-1175 Suspicious User Account Creation via Net Command
 description: Detects creation of new user accounts under administrative groups using
   the net command, indicative of Storm-1175 persistence and privilege escalation.
 id: 1a2b3c4d-5e6f-4789-abcd-1234567890ab
+author: Huntable CTI Studio
+date: 2026-04-08
 tags:
 - attack.t1136
 - attack.t1078
+- attack.persistence
+- attack.defense-evasion
+- attack.privilege-escalation
+- attack.initial-access
 level: high
 status: experimental
 logsource:
