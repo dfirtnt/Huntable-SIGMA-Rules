@@ -1,0 +1,25 @@
+title: Privilege Level Check via PowerShell
+id: 4c5d6e7f-8a9b-0c1d-2e3f-4a5b6c7d8e9f
+status: experimental
+description: Detects PowerShell command executed via cmd.exe to check the privilege level of the current user.
+references:
+  - https://thedfirreport.com/2025/07/14/kongtuke-filefix-leads-to-new-interlock-rat-variant/
+author: Huntable CTI Studio User
+date: 2026/05/29
+tags:
+  - attack.discovery
+  - attack.t1087
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: "\\cmd.exe"
+    CommandLine|contains|all:
+      - powershell
+      - GetCurrent().Name
+      - IsInRole
+  condition: selection
+falsepositives:
+  - Administrative or diagnostic PowerShell usage
+level: medium

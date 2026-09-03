@@ -1,0 +1,46 @@
+title: Powercfg Disables Sleep for Cryptomining
+id: 7b2d9eb1-8dc5-4d62-a00d-2ed1f6f50bc0
+status: experimental
+description: Detects use of powercfg.exe to disable hibernate or standby timeouts on AC
+  and battery power, a behavior used by cryptominers to maximize runtime on an infected
+  host during impact.
+references:
+  - https://securelist.com/video-books-pirates-miners-rat/119943/
+author: Huntable CTI Studio - Andrew Skatoff
+date: 2026/06/02
+tags:
+  - attack.impact
+  - attack.t1496
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\powercfg.exe'
+  selection_hibernate_ac:
+    CommandLine|contains|all:
+      - /x
+      - -hibernate-timeout-ac
+      - ' 0'
+  selection_hibernate_dc:
+    CommandLine|contains|all:
+      - /x
+      - -hibernate-timeout-dc
+      - ' 0'
+  selection_standby_ac:
+    CommandLine|contains|all:
+      - /x
+      - -standby-timeout-ac
+      - ' 0'
+  selection_standby_dc:
+    CommandLine|contains|all:
+      - /x
+      - -standby-timeout-dc
+      - ' 0'
+  condition: selection_img and 1 of selection_*
+falsepositives:
+  - Endpoint configuration scripts or Group Policy actions that standardize power
+    settings across an enterprise
+  - Helpdesk or IT administrators manually adjusting power timeouts on specific
+    systems
+level: low
