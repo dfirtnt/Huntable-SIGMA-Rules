@@ -1,0 +1,7 @@
+version: 1
+allowed_licenses:
+  - id: CC-BY-4.0
+    attribution_required: true
+    preserve_license_notice: true
+    mark_changes: true
+    no_endorsement: true
