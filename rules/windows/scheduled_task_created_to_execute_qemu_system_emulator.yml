@@ -5,12 +5,14 @@ description: Detects creation of a scheduled task that executes QEMU system emul
 references:
   - Internal threat intelligence report
 author: Cybersecurity Detection Engineer
-date: 2024/01/15
+date: 2024-01-15
 modified: 2024/01/15
 tags:
   - attack.persistence
   - attack.t1053.005
-  - attack.defense_evasion
+  - attack.defense-evasion
+  - attack.privilege-escalation
+  - attack.execution
 logsource:
   category: process_creation
   product: windows

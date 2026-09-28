@@ -1,9 +1,13 @@
 title: 'Bloody Wolf: NetSupport RAT Scheduled Task Persistence on Logon'
 description: Detects the Bloody Wolf campaign creating a scheduled task that triggers on user logon with limited run level to persist a NetSupport RAT executable
 id: 2c5f9e43-6d1a-4f34-c0a3-4a7e8f9d0a1b
+author: Huntable CTI Studio
+date: 2026-06-02
 tags:
 - attack.persistence
 - attack.t1053.005
+- attack.privilege-escalation
+- attack.execution
 level: high
 status: experimental
 logsource:

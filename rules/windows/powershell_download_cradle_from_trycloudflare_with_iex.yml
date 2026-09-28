@@ -2,10 +2,12 @@ title: PowerShell Download Cradle From TryCloudflare With IEX
 id: 4ba7d74f-10ff-4c4a-bbc3-dc6f9c6a7d8a
 status: experimental
 description: Detects PowerShell download cradle activity that retrieves content from a trycloudflare.com URL via WebClient and immediately executes it with IEX.
+author: Huntable CTI Studio
+date: 2026-06-02
 tags:
   - attack.execution
   - attack.t1059.001
-  - attack.command_and_control
+  - attack.command-and-control
   - attack.t1105
 logsource:
   product: windows

@@ -3,6 +3,8 @@ description: Detects PowerShell launching a PHP interpreter from a user AppData 
   directory with ZIP extension directives and a local CFG file, a suspicious execution
   pattern associated with Interlock RAT delivery.
 id: 01ac4454-82ad-4b6f-a0d9-2b441c24db3d
+author: Huntable CTI Studio
+date: 2026-06-02
 tags:
 - attack.execution
 - attack.t1059.001

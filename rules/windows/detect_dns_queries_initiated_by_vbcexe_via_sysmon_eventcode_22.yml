@@ -12,6 +12,7 @@ tags:
   - attack.t1071.004
   - attack.execution
   - attack.persistence
+  - attack.command-and-control
 logsource:
   product: windows
   service: sysmon
