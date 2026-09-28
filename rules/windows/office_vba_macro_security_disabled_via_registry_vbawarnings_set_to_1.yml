@@ -26,13 +26,14 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection:
+    selection_key:
         TargetObject|contains: '\Security\VBAWarnings'
+        Details: 'DWORD (0x00000001)'
+    selection_office_version:
         TargetObject|contains:
             - '\Microsoft\Office\16.'
             - '\Microsoft\Office\19.'
-        Details: 'DWORD (0x00000001)'
-    condition: selection
+    condition: selection_key and selection_office_version
 falsepositives:
     - >-
       Legitimate IT administrators deploying macro-enabled Office solutions
