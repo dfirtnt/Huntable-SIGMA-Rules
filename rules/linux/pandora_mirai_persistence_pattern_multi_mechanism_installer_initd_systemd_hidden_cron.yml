@@ -1,0 +1,44 @@
+title: Pandora-Mirai Persistence Pattern — Multi-Mechanism Installer (Init.d, Systemd, Hidden Cron)
+id: 311787eb-af20-4ec5-90b3-ef3cb6797771
+status: experimental
+description: >-
+  Detects 2-of-3 co-occurrence of the distinctive Linux persistence vectors used by the Pandora-Mirai (UTA-2026-014) persistent_bot.sh installer — masquerade-named init.d service (/etc/init.d/sysupdate), masquerade systemd unit (/etc/systemd/system/system-update.service), and a hidden dot-prefix cron entry under /etc/cron.d/. Corrected from the original: the ubiquitous /etc/rc.local vector was removed (routine target for many legitimate deployment tools with no discriminating value alone), and the rule no longer claims an un-implemented 60-second time-window correlation.
+references:
+    - https://the-hunters-ledger.com/reports/rovodev-mirai-matrix-c2-87.106.143.220/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1037.004
+    - attack.t1053.003
+    - attack.t1543.002
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_sysupdate:
+        TargetFilename: '/etc/init.d/sysupdate'
+    selection_systemd:
+        TargetFilename: '/etc/systemd/system/system-update.service'
+    selection_cron_hidden:
+        TargetFilename|startswith: '/etc/cron.d/.'
+    condition: >-
+        (selection_sysupdate and selection_systemd) or
+        (selection_sysupdate and selection_cron_hidden) or
+        (selection_systemd and selection_cron_hidden)
+falsepositives:
+    - Legitimate system update scripts that use similar naming — verify service content references known-good update infrastructure
+    - Security tooling (OSSEC, Wazuh agent) that creates init.d and systemd units at install time
+level: high
+
+BusyBox SORA Marker Execution: Sora-Derivative Mirai-Fork Active on Host
+
+Tier: Detection
+Robustness: 2
+ATT&CK Coverage: T1059.004 (Unix Shell), T1095 (Non-Application Layer Protocol)
+Confidence: HIGH
+Rationale: /bin/busybox SORA is not a valid busybox applet invocation and has no legitimate use — it is a Sora-lineage self-identification marker used by this operator’s Naku/Pandora build and by other Sora-derivative Mirai forks generally, making it a tool-family artifact rather than a single-build literal (an operator would need to recompile from a divergent source tree to remove it, which most downstream Sora-lineage adopters do not do). Unchanged from the original file.
+False Positives: Unlikely — /bin/busybox SORA is not a valid busybox applet call and has no legitimate use.

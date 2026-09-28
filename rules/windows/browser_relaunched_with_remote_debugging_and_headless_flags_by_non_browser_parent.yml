@@ -1,0 +1,50 @@
+title: Browser Relaunched with Remote Debugging and Headless Flags by Non-Browser Parent
+id: b788a75b-a966-47d5-b91b-5fb92b2e9571
+status: experimental
+description: >-
+  Detects a Chromium-based browser process launched with --remote-debugging-port,
+  --headless, and --user-data-dir simultaneously by a parent process that is not a
+  known browser or developer-automation binary. This flag combination is used by the
+  EvilSoul-Engine stealer-builder MaaS and its bundled xaitax ChromElevator tool to
+  relaunch the victim's own browser under CDP control and pull already-decrypted
+  cookies via Network.getAllCookies, bypassing Chrome App-Bound Encryption without
+  administrator rights.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/evilsoul-engine-stealer-maas-detections/
+    - https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption
+author: The Hunters Ledger
+date: '2026-07-03'
+tags:
+    - attack.credential-access
+    - attack.t1539
+    - attack.collection
+    - attack.t1185
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_flags:
+        CommandLine|contains|all:
+            - '--remote-debugging-port'
+            - '--headless'
+            - '--user-data-dir'
+    filter_main_browser_parent:
+        ParentImage|endswith:
+            - '\chrome.exe'
+            - '\msedge.exe'
+            - '\brave.exe'
+            - '\explorer.exe'
+    filter_dev_tooling_parent:
+        ParentImage|endswith:
+            - '\node.exe'
+            - '\python.exe'
+            - '\pythonw.exe'
+    condition: selection_flags and not 1 of filter_*
+falsepositives:
+    - Legitimate browser automation frameworks (Selenium, Puppeteer, Playwright) launched from a known developer-tooling parent process
+    - QA/CI pipelines that headlessly drive a browser for testing
+level: high
+
+File name: proc_creation_win_evilsoul_engine_cdp_cookie_theft.yml
+

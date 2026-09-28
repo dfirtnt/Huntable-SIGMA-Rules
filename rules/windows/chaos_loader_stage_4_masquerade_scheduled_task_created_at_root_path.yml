@@ -1,0 +1,43 @@
+title: Chaos Loader Stage-4 Masquerade Scheduled Task Created at Root Path
+id: 7a3f9c12-e4b8-4d7a-a1f3-8c6e2b0d5f91
+status: experimental
+description: >-
+  Detects creation of a scheduled task named 'Microsoft Defender' at the
+  task-scheduler root path (\), which is the Stage-4 persistence
+  mechanism of the Chaos/TorBrowserTor private crypter. Legitimate
+  Windows Defender tasks reside at \Microsoft\Windows\Windows Defender\
+  — a task at the root path with this name is always malicious for this
+  build. The task is configured with a BOOT trigger, RunLevel HIGHEST,
+  and Hidden=true to survive reboots and maintain elevated persistence.
+  The task name is attacker-chosen and may rotate in a future build.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1053.005
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4698
+        TaskName: '\Microsoft Defender'
+    filter_legitimate:
+        TaskName|contains:
+            - '\Microsoft\Windows\Windows Defender\'
+            - '\Microsoft\Windows Defender\'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - >-
+      No known legitimate software creates a root-path scheduled task
+      named Microsoft Defender for THIS build; a future build renaming
+      the masquerade task name would evade this rule entirely
+level: medium
+

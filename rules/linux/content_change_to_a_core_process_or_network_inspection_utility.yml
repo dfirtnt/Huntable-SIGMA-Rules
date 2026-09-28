@@ -1,0 +1,45 @@
+title: Content Change to a Core Process or Network Inspection Utility
+id: 2581fa99-4d4b-412d-a2b5-46a119e87aa5
+status: experimental
+description: >-
+    Detects a file-write event against one of the seven Linux binaries most
+    commonly replaced by a userland rootkit to hide processes, network
+    connections, files and package tampering (ps, top, pstree, netstat,
+    lsof, find, rpm). A single hit is common after routine package updates;
+    multiple hits across this set on the same host in a short window,
+    outside a package-manager transaction, is the high-confidence signature
+    and should be triaged as a probable rootkit install.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+author: The Hunters Ledger
+date: 2026-08-17
+tags:
+    - attack.stealth
+    - attack.t1014
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection:
+        TargetFilename:
+            - '/bin/ps'
+            - '/usr/bin/ps'
+            - '/bin/top'
+            - '/usr/bin/top'
+            - '/usr/bin/pstree'
+            - '/bin/netstat'
+            - '/usr/bin/netstat'
+            - '/usr/sbin/lsof'
+            - '/usr/bin/lsof'
+            - '/usr/bin/find'
+            - '/bin/find'
+            - '/bin/rpm'
+            - '/usr/bin/rpm'
+    condition: selection
+falsepositives:
+    - Routine package-manager updates to procps, psmisc, findutils or rpm
+    - Operating-system or distribution upgrades that replace these utilities during a normal maintenance window
+level: medium
+
+File name: file_event_lnx_userland_rootkit_binary_tamper.yml
+

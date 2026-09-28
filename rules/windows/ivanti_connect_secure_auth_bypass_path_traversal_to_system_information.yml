@@ -1,0 +1,32 @@
+title: Ivanti Connect Secure Auth-Bypass Path Traversal to System Information
+id: 783a5aa7-0a1a-4281-b011-bb6623d16250
+status: experimental
+description: >-
+    Detects HTTP requests exploiting CVE-2023-46805 (auth-bypass) chained with
+    CVE-2024-21887 (command injection) against Ivanti Connect Secure appliances,
+    matching the operator's observed path-traversal request to the system-information
+    endpoint and shell command substitution in the cac status endpoint.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/seasia-gov-exploitation-toolkit-144-172-106-236-detections/
+    - https://nvd.nist.gov/vuln/detail/CVE-2023-46805
+author: The Hunters Ledger
+date: 2026-07-17
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection_traversal:
+        cs-uri-stem|contains: '/api/v1/totp/user-backup-code/../../system/system-information'
+    selection_injection:
+        cs-uri-query|contains: '/cac/status?id=$('
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely outside authorized vulnerability-scanning or red-team activity against unpatched Ivanti Connect Secure appliances
+level: high
+
+Tier: Detection
+Robustness: 3
+ATT&CK Coverage: T1190 (Exploit Public-Facing Application)
+Confidence: HIGH

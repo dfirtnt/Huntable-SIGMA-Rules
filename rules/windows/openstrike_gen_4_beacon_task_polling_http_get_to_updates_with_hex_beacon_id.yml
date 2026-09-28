@@ -1,0 +1,36 @@
+title: OpenStrike Gen-4 Beacon Task Polling HTTP GET to /updates with Hex Beacon ID
+id: a8c35f72-4d19-4b83-9e6a-1c7d5e2b8f30
+status: experimental
+description: >-
+  Detects the OpenStrike Generation 4 beacon (beacon_windows_x64.exe)
+  task polling pattern — HTTP GET requests to /updates with an
+  8-character lowercase hex beacon ID query parameter. The beacon ID is
+  a djb2 hash variant (multiplier 0x1f) of ComputerName XOR'd with PID,
+  making it deterministic per host across process restarts. The
+  beaconing interval is approximately 5 seconds with 10 percent jitter
+  (4500-5500ms base). This rule alone has LOW-MEDIUM precision;
+  correlate with a corresponding POST to /submit?id=[same ID] and the
+  beaconing interval for high-confidence identification.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection:
+        cs-method: 'GET'
+        c-uri|re: '^/updates\?id=[0-9a-f]{8}$'
+    condition: selection
+falsepositives:
+    - >-
+      Web applications using /updates as an API endpoint with an id
+      parameter of exactly 8 lowercase hex characters (uncommon in
+      enterprise environments; verify against known application
+      inventory and look for correlated POST to /submit?id=)
+level: medium
+

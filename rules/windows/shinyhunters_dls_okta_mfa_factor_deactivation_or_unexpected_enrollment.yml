@@ -1,0 +1,46 @@
+title: ShinyHunters DLS — Okta MFA Factor Deactivation or Unexpected Enrollment
+id: ef025d6d-d54d-4db3-87b8-a255895ebafd
+status: experimental
+description: >-
+  Detects Okta MFA factor deactivation or new factor enrollment events
+  matching the ShinyHunters vishing TTP: threat actors impersonate
+  employees to convince IT support to reset MFA
+  (user.mfa.factor.deactivate), then enroll an actor-controlled
+  authenticator device (user.mfa.factor.activate). Fires on either
+  event individually — MFA resets and enrollments are routine IT
+  operations, so this rule is a scoping lead for manual, time-windowed
+  correlation review rather than a standalone alert. Correlate both
+  event types by target user ID within a 30-minute window before
+  escalating.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shinyhunters-dls-91-215-85-22-20260417-detections/
+author: The Hunters Ledger
+date: 2026-04-17
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.initial-access
+    - attack.t1566.004
+    - attack.t1528
+    - attack.t1098
+    - detection.emerging-threats
+logsource:
+    product: okta
+    service: system_log
+detection:
+    selection_reset:
+        eventType: 'user.mfa.factor.deactivate'
+    selection_enroll:
+        eventType: 'user.mfa.factor.activate'
+    condition: selection_reset or selection_enroll
+falsepositives:
+    - Legitimate employee MFA resets followed by self-enrollment on a new device
+    - IT administrators assisting users with routine device replacement
+    - Bulk MFA enrollment during onboarding campaigns
+level: medium
+
+ShinyHunters DLS: PROSPERO Bulletproof Hosting CIDR Range Access
+
+Tier: Hunting
+Robustness: 1

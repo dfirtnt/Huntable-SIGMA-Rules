@@ -1,0 +1,35 @@
+title: ShinyHunters DLS — PROSPERO Bulletproof Hosting CIDR Range Access
+id: 5a0f622b-3b12-4811-a857-0eaed858017c
+status: experimental
+description: >-
+  Detects network connections to PROSPERO AS200593 IP prefixes
+  associated with ShinyHunters DLS infrastructure and co-hosted
+  extortion campaigns. These CIDR blocks are bulletproof-hosting
+  ranges shared by multiple threat-actor operations beyond
+  ShinyHunters. A lower-fidelity, context-dependent indicator —
+  enrich with destination reputation and correlate with other
+  ShinyHunters indicators before actioning.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shinyhunters-dls-91-215-85-22-20260417-detections/
+author: The Hunters Ledger
+date: 2026-04-17
+tags:
+    - attack.command-and-control
+    - attack.resource-development
+    - attack.t1583.003
+    - attack.t1090.003
+    - detection.emerging-threats
+logsource:
+    product: firewall
+detection:
+    selection:
+        DestinationIp|cidr:
+            - '91.215.85.0/24'
+            - '91.202.233.0/24'
+            - '193.24.123.0/24'
+    condition: selection
+falsepositives:
+    - Legitimate services co-hosted on PROSPERO AS200593 — shared bulletproof hosting environment where other tenants may include unrelated or lower-risk operations
+    - Threat intelligence platform automated scanning of known malicious ranges
+level: low
+

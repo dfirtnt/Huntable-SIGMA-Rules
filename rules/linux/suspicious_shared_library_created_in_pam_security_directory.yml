@@ -1,0 +1,51 @@
+title: Suspicious Shared Library Created in PAM Security Directory
+id: 21b2646a-7e0b-4d6c-8392-d976b8388fa3
+status: experimental
+description: >-
+    Detects creation of a .so shared library file in /lib/security/ or similar PAM
+    module directories by non-package-manager processes. The GHOST cryptojacker kit
+    drops libpam_cache.so into /lib/security/ using PAM-style filename camouflage as
+    a deceptive LD_PRELOAD rootkit. Legitimate PAM modules are always installed via
+    package management — direct file creation from a shell or download tool indicates
+    rootkit deployment.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/ghost-cryptojacker-vova75rus-77.110.96.200-detections/
+    - https://censys.com/ghost-cryptojacker-targeting-ai
+author: The Hunters Ledger
+date: 2026-05-25
+tags:
+    - attack.stealth
+    - attack.persistence
+    - attack.execution
+    - attack.t1574.006
+    - attack.t1014
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_path:
+        TargetFilename|startswith:
+            - '/lib/security/'
+            - '/lib/x86_64-linux-gnu/security/'
+            - '/usr/lib/security/'
+            - '/usr/lib/x86_64-linux-gnu/security/'
+        TargetFilename|endswith: '.so'
+    filter_pkg_mgr:
+        Image|endswith:
+            - '/dpkg'
+            - '/apt'
+            - '/apt-get'
+            - '/rpm'
+            - '/yum'
+            - '/dnf'
+            - '/ldconfig'
+    condition: selection_path and not filter_pkg_mgr
+falsepositives:
+    - >-
+      Legitimate PAM module installation by package manager (filtered by
+      exclusion above — confirm filter is working)
+    - Manual PAM plugin deployment by system administrator (require change
+      management verification)
+level: high
+

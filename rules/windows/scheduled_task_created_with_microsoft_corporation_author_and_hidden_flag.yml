@@ -1,0 +1,39 @@
+title: Scheduled Task Created with Microsoft Corporation Author and Hidden Flag
+id: c69291c1-70a6-4aa1-835f-bc26d4afcc2f
+status: experimental
+description: >-
+  Detects creation of a new scheduled task whose Task XML Author field is set
+  to the literal string "Microsoft Corporation" combined with the hidden
+  flag enabled. This is the EvilSoul-Engine stealer.js build's persistence
+  masquerade, designed to blend into Task Scheduler listings next to genuine
+  Microsoft-authored tasks; legitimate Microsoft tasks are installed by the
+  OS image or Windows Update rather than created at runtime.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/evilsoul-engine-stealer-maas-detections/
+author: The Hunters Ledger
+date: '2026-07-03'
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1053.005
+    - attack.stealth
+    - attack.t1036.004
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: security
+    definition: 'Requires Task Scheduler operational logging or Security auditing of Task Scheduler object creation (Event ID 4698) with TaskContent captured'
+detection:
+    selection:
+        EventID: 4698
+        TaskContent|contains:
+            - '<Author>Microsoft Corporation</Author>'
+            - '<Hidden>true</Hidden>'
+    condition: selection
+falsepositives:
+    - Unlikely — genuine Microsoft Corporation-authored tasks are pre-installed by the OS, not created via runtime Event ID 4698 registration by a user-context process
+level: high
+
+File name: win_security_evilsoul_engine_hidden_scheduled_task_masquerade.yml
+

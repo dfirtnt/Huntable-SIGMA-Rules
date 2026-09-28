@@ -1,0 +1,38 @@
+title: OpenStrike Gen-4 Beacon Output Submission HTTP POST to /submit with Hex Beacon ID
+id: b2e49c83-5f61-4a77-9d3e-2b8c1a4f7e52
+status: experimental
+description: >-
+  Detects the OpenStrike Generation 4 beacon output submission pattern —
+  HTTP POST to /submit with an 8-character lowercase hex beacon ID query
+  parameter. Command output is AES-128-CBC encrypted with PKCS7 padding,
+  then a 16-byte truncated HMAC-SHA256 tag is appended (Encrypt-then-MAC).
+  The beacon ID matches the corresponding GET to /updates?id=[same ID].
+  Correlating matched pairs of GET /updates and POST /submit with the
+  same 8-hex-digit ID provides higher-confidence identification of an
+  active gen-4 beacon session; standalone this rule has LOW-MEDIUM
+  precision.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.exfiltration
+    - attack.t1041
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection:
+        cs-method: 'POST'
+        c-uri|re: '^/submit\?id=[0-9a-f]{8}$'
+    condition: selection
+falsepositives:
+    - >-
+      API endpoints using /submit with an id parameter of exactly 8 hex
+      characters accepting POST data (uncommon in enterprise
+      environments; correlate with matched GET to /updates?id= for the
+      same ID to confirm)
+level: medium
+

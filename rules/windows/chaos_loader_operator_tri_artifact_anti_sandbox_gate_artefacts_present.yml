@@ -1,0 +1,42 @@
+title: Chaos Loader Operator Tri-Artifact Anti-Sandbox Gate Artefacts Present
+id: c4f7b2a9-6d3e-4c8f-d1a5-7b9e4f2c6a18
+status: experimental
+description: >-
+  Detects simultaneous presence of the three artefacts checked by the
+  Chaos/TorBrowserTor crypter's inverted anti-sandbox gate — a process
+  running as 'admin' combined with creation of %TEMP%\VBE\ or
+  %TEMP%\mapping.csv. The gate exits the dropper silently when all three
+  match, suggesting this is the operator's own development host
+  signature rather than a victim-side artefact. Alert on the combination,
+  not individual artefacts.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.stealth
+    - attack.discovery
+    - attack.execution
+    - attack.t1497
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_mapping_csv:
+        User|contains: 'admin'
+        TargetFilename|endswith: '\mapping.csv'
+        TargetFilename|contains: '\AppData\Local\Temp\'
+    selection_vbe_dir:
+        User|contains: 'admin'
+        TargetFilename|contains:
+            - '\AppData\Local\Temp\VBE\'
+    condition: selection_mapping_csv or selection_vbe_dir
+falsepositives:
+    - >-
+      Legitimate VBScript Editor (VBE) installations on administrator
+      accounts may create %TEMP%\VBE\ directories
+    - Administrative accounts using tools that generate mapping.csv files in TEMP
+    - Tune by excluding known-good admin workstations and software deployment systems
+level: medium
+

@@ -1,0 +1,33 @@
+title: Outbound Gemini API Traffic from Non-AI-Workload Server Host (Stolen Key Validation)
+id: 06d6f95f-2946-4bb9-b0ff-49921d91922f
+status: experimental
+description: >-
+  Detects outbound DNS queries to generativelanguage.googleapis.com from server-class
+  hosts without a legitimate AI-application workload designation. Case 1 (Russian
+  Gemini operator) uses stolen Gemini API keys validated via check_keys.py, and the
+  same endpoint is used by the LLM-personalized credential mutation script to invoke
+  Gemini 2.5 Flash for per-target password generation at attack time.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.credential-access
+  - attack.t1552.001
+  - detection.emerging-threats
+logsource:
+  category: dns_query
+  product: linux
+detection:
+  selection:
+    query|contains:
+      - generativelanguage.googleapis.com
+      - aistudio.google.com
+  condition: selection
+falsepositives:
+  - >-
+    Legitimate AI applications and developer tools that use the Gemini API. Requires
+    host-role classification to be effective — suppress on designated AI application
+    servers and developer workstations.
+level: low
+

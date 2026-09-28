@@ -1,0 +1,41 @@
+title: Base64 Decoded Script Written to Tmp and Executed by Bash
+id: a3dcd1d3-0c9f-4cd2-a6e7-bed5dd6bd3c1
+status: experimental
+description: >-
+    Detects a single shell command line that decodes a base64 payload into a script file
+    under /tmp and immediately executes it with bash, the staging shape this campaign's
+    deploy driver uses to carry its miner install script through shell quoting constraints
+    (echo of encoded script piped to base64 -d into /tmp/d.sh, then bash of that file).
+    Cloud provisioning and installer tooling legitimately uses decode-then-execute patterns,
+    so this is a hunting anchor and triage hits against deployment context.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gotenberg-rce-cryptomining-107-175-69-137-detections/
+author: The Hunters Ledger
+date: 2026-09-16
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1059.004
+    - attack.t1140
+    - stp.2
+logsource:
+    category: process_creation
+    product: linux
+    definition: >-
+        Requires process-creation telemetry that captures full command lines on the victim
+        host: auditd execve rules, Sysmon for Linux, or an EDR agent.
+detection:
+    selection_decode:
+        CommandLine|contains|all:
+            - 'base64 -d'
+            - '>/tmp/'
+    selection_exec:
+        CommandLine|contains|all:
+            - 'bash '
+            - '/tmp/'
+    condition: selection_decode and selection_exec
+falsepositives:
+    - Provisioning, cloud-init or installer scripts that decode payloads to tmp and run them
+    - Authorized security tooling staging encoded scripts
+level: medium
+

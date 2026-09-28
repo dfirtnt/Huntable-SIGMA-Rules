@@ -1,0 +1,36 @@
+title: Registry Save Of SAM, SYSTEM Or SECURITY Hive To ProgramData
+id: 21265bec-0634-4d02-a3de-ddbba8f0ca89
+status: experimental
+description: >-
+  Detects reg.exe saving the SAM, SYSTEM, or SECURITY registry hives to a file under
+  C:\ProgramData, the offline credential-extraction pattern used to recover local and
+  cached domain credentials without touching LSASS directly.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.credential-access
+    - attack.t1003.002
+    - attack.t1003.004
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging that populates CommandLine, for example Sysmon EID 1 or Security EID 4688 with command line auditing enabled.'
+detection:
+    selection_image:
+        Image|endswith: '\reg.exe'
+    selection_verb:
+        CommandLine|contains: 'save'
+    selection_hive:
+        CommandLine|contains:
+            - 'SAM'
+            - 'SYSTEM'
+            - 'SECURITY'
+    selection_dest:
+        CommandLine|contains: '\ProgramData\'
+    condition: selection_image and selection_verb and selection_hive and selection_dest
+falsepositives:
+    - Authorized backup or disaster-recovery tooling that exports these hives, though the ProgramData destination is unusual for such tooling
+level: high
+

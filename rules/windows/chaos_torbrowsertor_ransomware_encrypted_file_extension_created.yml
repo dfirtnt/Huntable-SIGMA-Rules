@@ -1,0 +1,28 @@
+title: Chaos TorBrowserTor Ransomware Encrypted File Extension Created
+name: chaos_torbrowsertor_extension_created
+id: 3faf111a-bcf8-479e-9e7c-7e0ae94e0483
+status: experimental
+description: >-
+  Detects creation of a file with the .torbrowsertor extension, the
+  encrypted-file marker appended by Chaos/TorBrowserTor ransomware during
+  its encryption routine. This extension is a Chaos-builder-configuration
+  invariant confirmed on a public sibling sample, not specific to this
+  operator, and has no legitimate use.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.impact
+    - attack.t1486
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith: '.torbrowsertor'
+    condition: selection
+falsepositives:
+    - Unlikely — .torbrowsertor is not a legitimate file extension
+level: high

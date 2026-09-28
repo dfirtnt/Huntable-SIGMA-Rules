@@ -1,0 +1,62 @@
+title: Content Change to /etc/passwd or /usr/bin/su by a Non-Package Account Tool
+id: 9d64a8dc-f752-4455-9329-73ff8738d150
+status: experimental
+description: >-
+    Detects a file-write event against /etc/passwd or /usr/bin/su, excluding
+    writes to /etc/passwd made by the known account-provisioning tools
+    systemd-sysusers, useradd, and chfn. Both files are the two overwrite
+    targets of a public Linux kernel local-privilege-escalation exploit chain
+    that patches the page cache via IPsec/XFRM or AF_RXRPC splice tricks to
+    create a uid-0 account or a backdoored su binary without any legitimate
+    package installation. This rule recognizes the invoking tool by binary
+    path, not whether a package manager actually triggered it, so it does not
+    correlate with an actual package transaction: every /usr/bin/su write
+    still alerts regardless of what wrote it. See the companion
+    process_creation rule, Useradd or Usermod Setting a Root-Equivalent or
+    Duplicate UID Outside a Known Package Manager
+    (ea34e2ee-aedb-4ead-a572-2fb6531e41a2), for coverage of these same account
+    tools when an attacker invokes them directly rather than through a
+    package's post-install hook.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+author: The Hunters Ledger
+date: 2026-08-17
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+    - attack.defense-impairment
+    - attack.t1222.002
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection:
+        TargetFilename:
+            - '/etc/passwd'
+            - '/usr/bin/su'
+    filter_system_account_tools:
+        # sourced: measured 2026-09-02 on logs-endpoint.events.file-* over the full
+        # 55-day retained window - 4 of 4 lifetime alerts were legitimate account
+        # provisioning, reproduced independently via pacman's 20-systemd-sysusers.hook
+        # and dpkg's adduser --system (invoking useradd and chfn)
+        TargetFilename: '/etc/passwd'
+        Image|endswith:
+            - '/systemd-sysusers'
+            - '/useradd'
+            - '/chfn'
+    condition: selection and not filter_system_account_tools
+falsepositives:
+    - >-
+        A package-manager transaction that patches /usr/bin/su by updating coreutils.
+        This arm is NOT filtered above (the exclusion is scoped to /etc/passwd only)
+        and should still be correlated and excluded before alerting.
+    - >-
+        Legitimate account provisioning against /etc/passwd via systemd-sysusers,
+        useradd, or chfn is excluded above and should not appear as an alert; if one
+        does, confirm the invoking binary path actually matches one of the three
+        filtered tools.
+level: high
+
+File name: file_event_lnx_passwd_su_privesc_tamper.yml
+

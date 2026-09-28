@@ -1,0 +1,24 @@
+title: Tomcat Spawning Windows Command Shell
+id: 3a7e1c94-2d56-4f80-b9a3-6c5e8d1f7240
+status: experimental
+description: Detects a Tomcat server process spawning the Windows command shell.
+references:
+- https://www.huntress.com/blog/threat-actor-compiles-cryptominer
+author: Huntable CTI Studio
+date: '2026-09-24'
+tags:
+- attack.execution
+- attack.t1059.003
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: \tomcat9.exe
+    Image|endswith: \cmd.exe
+    OriginalFileName: cmd.exe
+  condition: selection
+falsepositives:
+- Tomcat administration scripts
+- Authorized application maintenance
+level: medium

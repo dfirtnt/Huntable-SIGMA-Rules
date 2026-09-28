@@ -1,0 +1,50 @@
+title: Outbound Connection to Cloud Instance Metadata Service Address
+id: 0953dc62-3a1a-4b35-b765-86bbbac28cfa
+status: experimental
+description: >-
+    Detects a network connection to the well-known cloud instance metadata service
+    address 169.254.169.254, the SSRF target used against Tableau Server and a
+    GenAI chatbot integration in this campaign to retrieve cloud credentials. Many
+    legitimate cloud-native agents query this address routinely, so this is a broad
+    hunting signal rather than a standalone alert.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/seasia-gov-exploitation-toolkit-144-172-106-236-detections/
+author: The Hunters Ledger
+date: 2026-07-17
+tags:
+    - attack.credential-access
+    - attack.t1552.005
+logsource:
+    category: network_connection
+    product: linux
+    definition: >-
+        Requires network-connection telemetry carrying process attribution (a populated
+        Image field) - Sysmon for Linux Event ID 3, auditd correlated to process, or an
+        EDR agent network-connection event. It does NOT apply to flow-only sources
+        (netflow, VPC or firewall flow logs) that carry no process field; those are
+        excluded below by filter_no_process_data, because without process context this
+        rule cannot separate attacker SSRF from routine agent polling.
+detection:
+    selection:
+        DestinationIp: '169.254.169.254'
+    filter_no_process_data:
+        Image: null
+    filter_instance_agents:
+        Image|contains:
+            - '/elastic-agent'
+            - '/agentbeat'
+            - '/metricbeat'
+            - '/filebeat'
+            - '/osquerybeat'
+            - '/cloud-init'
+            - '/amazon-ssm-agent'
+            - '/google_guest_agent'
+            - '/waagent'
+            - '/elasticsearch/jdk/bin/java'
+    condition: selection and not filter_no_process_data and not filter_instance_agents
+falsepositives:
+    - >-
+      Cloud SDK or CLI calls from an application that legitimately reads instance
+      metadata, where the calling binary is not on the instance-agent filter list
+level: low
+

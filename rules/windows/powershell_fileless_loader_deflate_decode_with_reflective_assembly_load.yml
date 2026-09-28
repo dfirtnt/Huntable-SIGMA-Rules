@@ -1,0 +1,42 @@
+title: PowerShell Fileless Loader — Deflate Decode with Reflective Assembly Load
+id: e2c8d419-6a37-4f5b-8e90-4d1b7c5e2f85
+status: experimental
+description: >-
+  Detects PowerShell ScriptBlocks combining Base64 decoding, Deflate
+  decompression via System.IO.DeflateStream, and reflective in-memory
+  execution via Reflection.Assembly::Load() — the technique used by the
+  GruntHTTP.ps1 Covenant delivery wrapper analyzed in this campaign. This
+  three-stage chain is a durable technique fingerprint independent of any
+  specific Covenant listener configuration, but legitimate software
+  deployment tooling occasionally combines the same primitives, so this is
+  a Hunting-tier lead requiring analyst triage rather than a high-confidence
+  alert.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-193-56-255-154-20260403-detections/
+    - https://github.com/cobbr/Covenant
+author: The Hunters Ledger
+date: 2026-04-03
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1059.001
+    - attack.t1140
+    - attack.t1620
+    - detection.emerging-threats
+logsource:
+    category: ps_script
+    product: windows
+detection:
+    selection_decode_chain:
+        ScriptBlockText|contains|all:
+            - 'DeflateStream'
+            - 'Reflection.Assembly'
+            - 'FromBase64String'
+            - 'MemoryStream'
+    condition: selection_decode_chain
+falsepositives:
+    - Legitimate software deployment scripts that compress and load .NET assemblies via PowerShell (uncommon but possible in enterprise environments with custom tooling)
+    - Security research or red team tooling other than Covenant that uses the same delivery pattern
+    - PowerShell-based application packaging tools that compress payloads with Deflate and load them reflectively
+level: medium
+

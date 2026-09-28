@@ -1,0 +1,33 @@
+title: Chisel Client Establishing a Reverse SOCKS Tunnel
+id: 952efdf0-9d41-4d5b-a720-de3e66546fa1
+status: experimental
+description: >-
+    Detects execution of the chisel tunneling client with the reverse-SOCKS
+    shorthand flag, which turns an outbound HTTP/WebSocket connection to an
+    operator-controlled chisel server into a local SOCKS proxy usable for
+    internal-network pivoting.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+    - https://github.com/jpillora/chisel
+author: The Hunters Ledger
+date: 2026-08-17
+tags:
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith:
+            - '\chisel.exe'
+            - '\chisel_win.exe'
+    selection_flag:
+        CommandLine|contains: 'r:socks'
+    condition: all of selection_*
+falsepositives:
+    - Authorized use of chisel for legitimate remote-support or internal tunneling by an IT team
+level: high
+
+File name: proc_creation_win_chisel_reverse_socks_tunnel.yml
+

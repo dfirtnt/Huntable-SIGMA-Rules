@@ -1,0 +1,48 @@
+title: MSSQL CLR Backdoor Installation via CREATE ASSEMBLY and Reverse Shell Procedure
+id: 68e96847-afed-4fbd-843f-952e22e89f97
+status: experimental
+description: >-
+  Detects SQL Server CLR backdoor installation indicators: enabling CLR
+  execution via sp_configure, or registering a stored procedure named
+  reverse_shell via EXTERNAL NAME. The reverse_shell procedure name has
+  no legitimate use and is a direct indicator of cmd_exec.dll
+  installation; CLR enablement alone is rare in production and disabled
+  by default.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/flaskc2-postex-toolkit-67-215-232-25-detections/
+    - https://www.netspi.com/blog/technical/network-penetration-testing/attacking-sql-server-clr-assemblies/
+author: The Hunters Ledger
+date: '2026-06-12'
+tags:
+    - attack.persistence
+    - attack.t1505.001
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: application
+detection:
+    selection_clr:
+        Provider_Name|contains: 'MSSQL'
+        EventID: 15457
+        Message|contains: 'clr enabled'
+    selection_reverse_shell:
+        Provider_Name|contains: 'MSSQL'
+        Message|contains: 'reverse_shell'
+    condition: selection_clr or selection_reverse_shell
+falsepositives:
+    - Authorized .NET CLR assembly deployment by DBAs — correlate with change management tickets
+    - Development environments where CLR assemblies are used legitimately
+level: high
+
+IIS Webshell Execution: w3wp.exe Spawning cmd.exe or WScript
+
+Tier: Detection
+Robustness: 3
+ATT&CK Coverage: T1505.003 (Web Shell), T1059.003 (Windows Command Shell), T1059.005 (Visual Basic)
+Confidence: HIGH
+Rationale: IIS worker process spawning a shell interpreter is a well-established, family-agnostic technique chokepoint for webshell command execution — it catches both webshells staged in this campaign (miss.asp via WScript.Shell, NPCInfoList1.aspx via its loaded payload) and any other webshell family exercising the same execution pattern, and survives any campaign-specific renaming.
+False Positives: Legacy web applications that intentionally invoke shell processes from application code — baseline expected patterns. Authorized IIS management scripts running under the application pool identity.
+Blind Spots: A webshell that executes entirely in-process (no child process spawn — e.g., pure .NET reflection without a shell hop) is not covered by this rule.
+Validation: Trigger a webshell command that shells out from w3wp.exe — must match; normal IIS request handling with no shell spawn must NOT fire.
+Deployment: Sysmon (Event ID 1), Windows Security Event Log (4688), EDR process telemetry.
+

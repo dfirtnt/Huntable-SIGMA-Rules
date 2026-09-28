@@ -1,0 +1,39 @@
+title: Cryptojacker LD_PRELOAD Rootkit Drop to /lib/security (PAM-Style Camouflage Naming)
+id: 6c7e9d33-7dc3-411b-994f-37d431e05907
+status: experimental
+description: >-
+  Detects file creation in /lib/security or multiarch equivalents of .so files matching
+  the GHOST cryptojacker kit's deceptive PAM-style naming convention (libpam_cache*).
+  Once loaded, the rootkit hides its own filename from readdir output, making
+  filesystem-level detection via ls unreliable. This rule targets the write event
+  before the rootkit activates.
+references:
+    - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+    - attack.persistence
+    - attack.stealth
+    - attack.execution
+    - attack.t1574.006
+    - detection.emerging-threats
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_path:
+        TargetFilename|contains:
+            - /lib/security/
+            - /lib/x86_64-linux-gnu/security/
+            - /usr/lib/security/
+            - /usr/lib/x86_64-linux-gnu/security/
+    selection_name:
+        TargetFilename|contains: libpam_cache
+    condition: selection_path and selection_name
+falsepositives:
+    - >-
+      Legitimate distro packages installing PAM modules — verify parent process is
+      apt/dpkg/rpm/yum and not a shell or unknown binary. No legitimate Linux distribution
+      ships a libpam_cache.so PAM module.
+level: high
+

@@ -1,0 +1,32 @@
+title: Covenant C2 GruntStager HTTP Beacon — Campaign Session Token Detected
+id: d9a4b257-3f81-4e7c-b5d8-6c2e9f0a4b73
+status: experimental
+description: >-
+  Detects HTTP requests containing the Covenant C2 listener session token
+  75db-99b1-25fe4e9afbe58696-320bea73, hardcoded in both GruntHTTP.exe
+  (Build 1) and the PE embedded in GruntHTTP.ps1 (Build 2). This token is a
+  listener-level constant that appears in every registration and
+  command-exchange request from any host executing either stager build,
+  making it the highest-value single network detection for this campaign.
+  The Chrome 41 / Windows 7 masquerade User-Agent observed alongside this
+  token in the same traffic is additional corroborating context, not a
+  required condition for this rule.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-193-56-255-154-20260403-detections/
+    - https://github.com/cobbr/Covenant
+author: The Hunters Ledger
+date: 2026-04-03
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-uri-query|contains: 'session=75db-99b1-25fe4e9afbe58696-320bea73'
+    condition: selection
+falsepositives:
+    - No legitimate proxy traffic is expected to contain this specific session token value
+level: high
+

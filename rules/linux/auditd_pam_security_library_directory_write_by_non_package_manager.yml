@@ -1,0 +1,42 @@
+title: Auditd - PAM Security Library Directory Write by Non-Package-Manager
+id: f26bb12b-dca1-4b62-adf1-9186d5d31560
+status: experimental
+description: >-
+    Detects auditd file write events (PATH record type with OPEN_W flag or CREATE)
+    on the /lib/security/ directory. Requires auditd rule "-w /lib/security -p wa
+    -k pam_module_write" to be active. The GHOST cryptojacker kit writes
+    libpam_cache.so to this directory using PAM-style filename camouflage; any
+    write from a non-package-manager process is a high-confidence rootkit drop.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/ghost-cryptojacker-vova75rus-77.110.96.200-detections/
+author: The Hunters Ledger
+date: 2026-05-25
+tags:
+    - attack.stealth
+    - attack.persistence
+    - attack.execution
+    - attack.t1574.006
+    - attack.t1014
+    - detection.emerging-threats
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_key:
+        type: 'PATH'
+        key: 'pam_module_write'
+        nametype:
+            - 'CREATE'
+            - 'DELETE'
+    filter_pkg_mgr:
+        exe|endswith:
+            - '/dpkg'
+            - '/rpm'
+            - '/ldconfig'
+            - '/update-alternatives'
+    condition: selection_key and not filter_pkg_mgr
+falsepositives:
+    - Package manager post-install hooks installing legitimate PAM modules (filtered above)
+    - System administrator manually copying a verified PAM module during maintenance
+level: high
+

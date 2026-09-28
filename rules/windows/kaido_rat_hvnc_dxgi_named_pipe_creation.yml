@@ -1,0 +1,32 @@
+title: KAIDO RAT HVNC DXGI Named-Pipe Creation
+id: 6fadc50c-a64b-4120-b02e-f22516b0c815
+status: experimental
+description: >-
+  Detects creation of a named pipe matching the kaido_dxgi_ prefix used
+  by the KAIDO Quasar-fork RAT's HVNC module to stream DXGI-captured
+  hidden-desktop frames from the swap-chain hook to the operator's
+  reader thread. This pipe is created only when the HVNC capability is
+  actively invoked by the operator over C2.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/kaido-quasar-rat-detections/
+author: The Hunters Ledger
+date: 2026-07-03
+tags:
+    - attack.command-and-control
+    - attack.t1219
+    - attack.collection
+    - attack.t1113
+    - detection.emerging-threats
+logsource:
+    category: pipe_created
+    product: windows
+detection:
+    selection:
+        PipeName|contains: '\kaido_dxgi_'
+    condition: selection
+falsepositives:
+    - >-
+      Unlikely — the kaido_dxgi_ pipe-name prefix has not been observed
+      in any legitimate Windows or third-party software to date
+level: medium
+

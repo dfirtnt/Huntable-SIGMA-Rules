@@ -1,0 +1,34 @@
+title: WindowsUpdateService Scheduled Task Creation By Dotnet RAT Chain
+id: 07502798-ce21-4812-86ca-3368b6f9f38c
+status: experimental
+description: >-
+    Detects creation of a scheduled task named "WindowsUpdateService" configured to
+    run at logon. This is the fileless .NET RAT chain's second persistence layer,
+    created from inside the injected MSBuild.exe process after the Defender tamper
+    step. This task name and mechanism are specific to the .NET RAT chain, the
+    unrelated CloudSync Tor-panel RAT in the same toolkit persists only via a
+    registry Run key and a Windows service, never a scheduled task.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'schtasks'
+            - '/tn'
+            - 'WindowsUpdateService'
+            - 'onlogon'
+    condition: selection
+falsepositives:
+    - Unlikely, "WindowsUpdateService" is not a task name used by any genuine Windows Update component
+level: high
+

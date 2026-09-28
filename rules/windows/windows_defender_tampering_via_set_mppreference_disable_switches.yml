@@ -1,0 +1,34 @@
+title: Windows Defender Tampering Via Set-MpPreference Disable Switches
+id: 3b3283c2-d047-402f-b46d-b6fb43faebf3
+status: experimental
+description: >-
+    Detects a PowerShell Set-MpPreference or Add-MpPreference command disabling
+    Windows Defender real-time protection, IOAV protection, or behavior monitoring.
+    Observed issued from inside an injected MSBuild.exe process immediately after a
+    fileless .NET RAT loads, to blind Defender ahead of further activity.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+    - https://learn.microsoft.com/en-us/powershell/module/defender/set-mppreference
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmdlet:
+        CommandLine|contains:
+            - 'Set-MpPreference'
+            - 'Add-MpPreference'
+    selection_option:
+        CommandLine|contains:
+            - 'DisableRealtimeMonitoring'
+            - 'DisableIOAVProtection'
+            - 'DisableBehaviorMonitoring'
+    condition: selection_cmdlet and selection_option
+falsepositives:
+    - Administrative hardening or troubleshooting scripts that legitimately toggle Defender preferences
+level: high
+

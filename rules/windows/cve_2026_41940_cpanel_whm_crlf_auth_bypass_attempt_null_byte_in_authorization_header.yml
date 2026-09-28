@@ -1,0 +1,38 @@
+title: CVE-2026-41940 cPanel WHM CRLF Auth Bypass Attempt - Null Byte in Authorization Header
+id: 7f3a2c91-e8d4-4b5a-9c1f-3e6d7a2b0f84
+status: experimental
+description: >-
+  Detects reconnaissance or exploitation attempts against the CVE-2026-41940 proxy-subdomain
+  admin paths, a CVSS 9.8 pre-authentication CRLF injection vulnerability in cPanel and WHM
+  (disclosed 2026-04-28). The operator toolkit file pipeline-41940.sh at 216.126.227.49
+  directly encodes this CVE. Raw Authorization header content, where the actual null-byte or
+  CRLF injection occurs, is not exposed as a standard webserver logsource field, so this rule
+  anchors on the fixed cPanel/WHM proxy-subdomain path markers the exploit chain targets
+  instead — it flags any request to these paths for analyst triage, not a confirmed injection.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-216-126-227-49-cve-2026-41940-cpanel-harvester-20260517/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: The Hunters Ledger
+date: 2026-05-17
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.credential-access
+    - attack.t1212
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_auth_null:
+        cs-uri-stem|contains:
+            - '/___proxy_subdomain_whm'
+            - '/___proxy_subdomain_cpanel'
+    condition: selection_auth_null
+falsepositives:
+    - >-
+      Legitimate administrator or monitoring traffic to the WHM/cPanel proxy-subdomain
+      admin interface on hosts where the feature is enabled and internet-reachable
+    - Authorized security assessment tools (Burp Suite, Nuclei, Metasploit) running assessments against cPanel infrastructure
+    - Security researchers probing CVE-2026-41940 in controlled environments
+level: medium
+

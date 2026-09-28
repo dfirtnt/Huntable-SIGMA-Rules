@@ -1,0 +1,35 @@
+title: PowerShell Creating a Remote Thread in a Long-Lived Windows Host Process
+id: 4f7db7ac-00df-47ae-9577-4452bfdc8910
+status: experimental
+description: >-
+    Detects powershell.exe creating a remote thread inside a long-lived Windows host process such as explorer.exe. This is the injection step of the AdaptixC2 operator loader observed at 45.130.148.125, which reflectively loads a .NET injector in memory, decodes its shellcode with a single-byte XOR, then calls CreateRemoteThread against the target so the beacon runs inside a trusted, network-active process with no on-disk DLL and no LoadLibrary event for an EDR to catch. A script interpreter creating a thread inside another process is not ordinary administrative behaviour, and because the source and target are both operating-system binaries rather than attacker-chosen names, the pattern survives a rebuild or a rename of the malware.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-45-130-148-125-20260430/
+author: The Hunters Ledger
+date: 2026-08-12
+tags:
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.t1055
+    - attack.t1055.002
+    - detection.emerging-threats
+logsource:
+    category: create_remote_thread
+    product: windows
+detection:
+    selection_source:
+        SourceImage|endswith: '\powershell.exe'
+    selection_target:
+        TargetImage|endswith:
+            - '\explorer.exe'
+            - '\svchost.exe'
+            - '\RuntimeBroker.exe'
+            - '\dllhost.exe'
+            - '\sihost.exe'
+            - '\taskhostw.exe'
+    condition: selection_source and selection_target
+falsepositives:
+    - Endpoint security agents and remote-management suites that instrument a running shell from a PowerShell host - baseline the injecting process path and its signing status, then exclude by signer rather than by image name
+    - Software deployment tooling that patches a running shell process, which is rare and should correlate with a change window
+level: high
+

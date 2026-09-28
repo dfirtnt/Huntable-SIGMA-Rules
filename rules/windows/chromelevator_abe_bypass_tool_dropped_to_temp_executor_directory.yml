@@ -1,0 +1,36 @@
+title: ChromElevator ABE-Bypass Tool Dropped to TEMP Executor Directory
+id: 2d54e3fa-a90b-4709-9521-b7a4ab95e76a
+status: experimental
+description: >-
+  Detects file creation of chromelevator.exe or chrome_decrypt.dll under a
+  TEMP\executor\ path, matching the staging location used by the EvilSoul-Engine
+  299a2e7f Socket.IO WebPanel build when it downloads the xaitax
+  Chrome-App-Bound-Encryption-Decryption tool pair from a GitHub supply-chain
+  mirror at runtime.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/evilsoul-engine-stealer-maas-detections/
+    - https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption
+author: The Hunters Ledger
+date: '2026-07-03'
+tags:
+    - attack.command-and-control
+    - attack.t1105
+    - attack.credential-access
+    - attack.t1555.003
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\executor\'
+        TargetFilename|endswith:
+            - '\chromelevator.exe'
+            - '\chrome_decrypt.dll'
+    condition: selection
+falsepositives:
+    - Extremely unlikely — these are operator-chosen filenames with no legitimate software collision
+level: medium
+
+File name: file_event_win_evilsoul_engine_abe_tool_drop.yml
+

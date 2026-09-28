@@ -1,0 +1,35 @@
+title: Operator Flask C2 Dashboard - Werkzeug 3.1.8 Banner with /login-2fa Redirect
+id: 5c7d1e4a-9b83-4f2c-8e67-1a3f5c8d2b90
+status: experimental
+description: >-
+  Detects requests to the /login-2fa path, the redirect target of the Flask C2 dashboard
+  operated by the CVE-2026-41940 cPanel harvester cluster (216.126.227.49). The server
+  presents HTTP Server: Werkzeug/3.1.8 Python/3.13.12 with a 302 redirect to /login-2fa on
+  the initial unauthenticated request; the Werkzeug development server on an internet-facing
+  port combined with this custom path fingerprints the operator's deployment pattern.
+  Standard proxy logsource fields do not expose response headers (Server banner, Location
+  redirect target), so this rule matches the client-request path itself, without host
+  scoping — it is intended for peer-C2 discovery across a monitored proxy segment, not as a
+  host-specific alert; retain the Shodan/Censys Werkzeug-banner pivot as a complementary
+  out-of-band OSINT hunting technique.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-216-126-227-49-cve-2026-41940-cpanel-harvester-20260517/
+author: The Hunters Ledger
+date: 2026-05-17
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection_login2fa_path:
+        c-uri|contains: '/login-2fa'
+    condition: selection_login2fa_path
+falsepositives:
+    - >-
+      Legitimate Flask developers running a login route named /login-2fa on a monitored
+      proxy segment (uncommon; verify destination host against confirmed operator infrastructure)
+    - Security researchers replicating the operator's C2 in a lab environment
+level: medium
+

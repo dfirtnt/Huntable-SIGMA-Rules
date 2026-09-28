@@ -1,0 +1,40 @@
+title: Gotenberg ExifTool Metadata Key CVE-2026-42589 Injection Attempt
+id: 5c6643c6-b8b6-415c-b5b1-e14ab21125f9
+status: experimental
+description: >-
+    Detects an HTTP POST to a Gotenberg ExifTool metadata-write endpoint whose metadata JSON
+    key carries the JSON-escaped newline sequence \n-if\nsystem( , the wire-confirmed
+    signature of CVE-2026-42589 ExifTool argv-splitting RCE. Requires a telemetry source that
+    captures the raw HTTP request body (a reverse proxy, WAF, or network sensor forwarding
+    body content); Gotenberg's own application log does not record the metadata payload on a
+    request that parses as valid JSON, so this rule cannot run on that log.
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-42589
+    - https://the-hunters-ledger.com/hunting-detections/gotenberg-rce-cryptomining-107-175-69-137-detections/
+author: The Hunters Ledger
+date: 2026-09-16
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - stp.4
+logsource:
+    category: webserver
+    definition: >-
+        Assumes a reverse proxy, WAF, or gateway in front of Gotenberg that logs the raw
+        request body, or a network sensor that forwards body content into a searchable field.
+        The payload anchor is a fieldless keyword selection that matches payload text in the
+        log message; the Sigma specification defines no native field for raw request-body
+        content in any supported logsource category, so the endpoint is identified by the
+        proxy/webserver fields and the payload by the free-text match.
+detection:
+    selection_method:
+        cs-method: 'POST'
+    selection_uri:
+        cs-uri-stem|contains: '/forms/pdfengines/metadata/write'
+    injection_anchor: '\n-if\nsystem('
+    condition: selection_method and selection_uri and injection_anchor
+falsepositives:
+    - Authorized security testing or red-team exercises sending the same proof-of-concept payload against a Gotenberg instance
+    - Unlikely otherwise, no legitimate metadata-write payload shape tested matched this anchor
+level: high
+

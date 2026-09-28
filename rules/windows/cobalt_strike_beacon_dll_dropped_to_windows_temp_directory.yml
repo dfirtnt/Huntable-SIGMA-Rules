@@ -1,0 +1,37 @@
+title: Cobalt Strike Beacon DLL Dropped to Windows Temp Directory
+id: e1f73b45-8d92-4c66-b3e7-4a9f5d1c8b27
+status: experimental
+description: >-
+  Detects creation of a file named beacon.dll in C:\Windows\Temp, the
+  hardcoded drop path used by OpenStrike dll_loader.exe. The loader uses
+  LoadLibraryA to load the Cobalt Strike beacon DLL from this exact path
+  and then enters an infinite Sleep(60000) keepalive loop. beacon.dll is
+  also the default Cobalt Strike Artifact Kit output filename used
+  broadly across unrelated deployments, so a hit should be treated as a
+  triage lead rather than a confirmed OpenStrike indicator on its own.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.execution
+    - attack.t1129
+    - attack.stealth
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename: 'C:\Windows\Temp\beacon.dll'
+    condition: selection
+falsepositives:
+    - >-
+      Unlikely — the filename beacon.dll at this exact path is not used
+      by any known legitimate software; however, beacon.dll is the
+      default Cobalt Strike Artifact Kit output filename, so any
+      unrelated Cobalt Strike deployment using the same default output
+      name and a similar drop path would also match
+level: medium
+

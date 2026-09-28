@@ -1,0 +1,44 @@
+title: AMSI Bypass via Suspicious amsi.dll Load from Non-Standard Path
+id: b02fa532-5fdd-4307-9a33-0d5935ffc4d0
+status: experimental
+description: |
+    Detects potential AMSI bypass attempts where a process loads amsi.dll from outside standard
+    system directories. Shadow RAT v2.6.4.0 loads amsi.dll to resolve and patch AmsiScanBuffer
+    with 15-byte shellcode returning E_INVALIDARG (0x80070057), effectively blinding in-memory
+    .NET scanning. Legitimate AMSI consumers (PowerShell, .NET host processes) load amsi.dll
+    from System32 or are explicitly filtered; a non-system, non-IDE process loading amsi.dll
+    from a user-writable path is a strong indicator of an AMSI patching attempt.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - detection.emerging-threats
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\amsi.dll'
+    filter_legitimate:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\dotnet.exe'
+            - '\csc.exe'
+            - '\msbuild.exe'
+    filter_system:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not (filter_legitimate or filter_system)
+falsepositives:
+    - Legitimate .NET applications or IDE tooling loading amsi.dll from non-standard installation paths
+    - Custom development environments or build pipelines running outside Program Files
+    - Security research tools that explicitly load amsi.dll for testing purposes
+level: medium
+

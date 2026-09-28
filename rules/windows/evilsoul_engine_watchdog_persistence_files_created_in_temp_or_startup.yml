@@ -1,0 +1,42 @@
+title: EvilSoul-Engine Watchdog Persistence Files Created in TEMP or Startup
+id: 5f925688-77fd-410a-9c8a-83ca801a5013
+status: experimental
+description: >-
+  Detects file creation of the specific watchdog and persistence-chain
+  filenames used by the EvilSoul-Engine 299a2e7f build's redundant
+  persistence-of-persistence mechanism, including updatesystem.cmd,
+  watcher.vbs, and update.bat, which are subsequently attribute-flagged
+  hidden to survive casual folder inspection.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/evilsoul-engine-stealer-maas-detections/
+author: The Hunters Ledger
+date: '2026-07-03'
+tags:
+    - attack.stealth
+    - attack.t1564.001
+    - attack.persistence
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1053.005
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\updatesystem.cmd'
+            - '\watcher.vbs'
+            - '\update.bat'
+    filter_common_update_paths:
+        TargetFilename|contains:
+            - '\Windows\System32\'
+            - '\Program Files\'
+    condition: selection and not filter_common_update_paths
+falsepositives:
+    - Legitimate software update scripts that happen to share these generic filenames outside protected system directories
+    - Custom internal IT automation using similarly named watchdog scripts
+level: medium
+
+File name: file_event_win_evilsoul_engine_watchdog_persistence.yml
+

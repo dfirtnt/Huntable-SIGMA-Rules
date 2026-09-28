@@ -1,0 +1,46 @@
+title: GHOST Kit Systemd Camouflage Service Unit Creation
+id: 16fce30a-b59f-461c-87fc-89ae2d736527
+status: experimental
+description: >-
+    Detects creation of systemd service unit files using GHOST cryptojacker kit
+    camouflage names. The GHOST kit installs fontconfig-cache.service (user-level
+    systemd persistence disguised as fontconfig caching) and systemd-journal-flush
+    override; operator processes are renamed to dbus-session-monitor (xmrig) and
+    gnome-shell-ext-updater (lolMiner). Creation of unit files with these names
+    by non-package-manager processes indicates GHOST kit systemd persistence.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/ghost-cryptojacker-vova75rus-77.110.96.200-detections/
+author: The Hunters Ledger
+date: 2026-05-25
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1543.002
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_ghost_unit_names:
+        TargetFilename|contains:
+            - 'fontconfig-cache.service'
+            - 'inotify_guard'
+            - 'dbus-session-monitor.service'
+            - 'gnome-shell-ext-updater.service'
+            - 'archivist-daemon.service'
+            - 'journald-svc.service'
+            - 'systemd-guard.service'
+    condition: selection_ghost_unit_names
+falsepositives:
+    - >-
+      Custom legitimate service deployments using similar names (extremely
+      unlikely for fontconfig-cache.service or gnome-shell-ext-updater.service
+      as systemd units)
+    - >-
+      Desktop environment package that legitimately provides
+      gnome-shell-ext-updater (verify package manager ownership with dpkg -S
+      or rpm -qf)
+level: medium
+

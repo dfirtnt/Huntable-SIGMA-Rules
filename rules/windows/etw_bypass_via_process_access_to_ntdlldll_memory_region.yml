@@ -1,0 +1,43 @@
+title: ETW Bypass via Process Access to ntdll.dll Memory Region
+id: 7e1f94cd-ed21-4cc9-b3d4-4b14308210c0
+status: experimental
+description: |
+    Detects processes acquiring full memory access rights to another process with call stack
+    activity in ntdll.dll, consistent with ETW patching. Shadow RAT v2.6.4.0 patches
+    ntdll.dll!EtwEventWrite with a single RET instruction (0xC3) via WriteProcessMemory,
+    causing all ETW events from the process to silently return without logging. This blinds
+    EDR tools and security monitoring products that rely on ETW for .NET CLR event visibility.
+    The GrantedAccess value 0x1FFFFF indicates full process access including write permissions.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - detection.emerging-threats
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        GrantedAccess|contains:
+            - '0x1FFFFF'
+            - '0x1F0FFF'
+        CallTrace|contains: 'ntdll.dll'
+    filter_self:
+        SourceImage|endswith:
+            - '\svchost.exe'
+            - '\lsass.exe'
+            - '\csrss.exe'
+            - '\services.exe'
+            - '\winlogon.exe'
+            - '\wininit.exe'
+    condition: selection and not filter_self
+falsepositives:
+    - Debugging tools and performance profilers legitimately requesting full process access
+    - Application compatibility shims that modify ntdll behavior at runtime
+    - Security products performing integrity verification on ntdll.dll
+    - Process monitoring tools with deep inspection capabilities
+level: medium
+

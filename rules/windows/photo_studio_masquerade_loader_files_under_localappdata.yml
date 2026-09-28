@@ -1,0 +1,30 @@
+title: Photo Studio Masquerade Loader Files Under LocalAppData
+id: d570d892-64b5-4eb9-ad99-2b615230bbdf
+status: experimental
+description: >-
+    Detects creation of a JScript or VBScript file inside a "Photo Studio" directory
+    under the user's LocalAppData folder. This is the on-disk persistence copy and
+    windowless relaunch wrapper for a fileless .NET RAT loader; no legitimate "Photo
+    Studio" application is installed by this path convention.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\Photo Studio\'
+        TargetFilename|endswith:
+            - '.js'
+            - '.vbs'
+    condition: selection
+falsepositives:
+    - Unlikely, no common legitimate application installs script files under a "Photo Studio" LocalAppData folder
+level: high
+

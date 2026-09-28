@@ -1,0 +1,27 @@
+title: Process Executed From X11-Socket-Lookalike Temp Directory
+id: 03268048-2fb3-40e2-9c26-b3afd233005c
+status: experimental
+description: >-
+    Detects a process executing from a /tmp/.X11-unix. directory carrying a random suffix.
+    Legitimate X11 uses the exact directory name without a trailing dot and suffix, so the
+    dot-suffixed variant is the GOCLOUD Linux miner hiding location for its XMRig binary.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.stealth
+    - attack.impact
+    - attack.t1564.001
+    - attack.t1496.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|contains: '/tmp/.X11-unix.'
+    condition: selection
+falsepositives:
+    - Unlikely; the standard X11 socket directory does not carry a dot suffix
+level: high
+

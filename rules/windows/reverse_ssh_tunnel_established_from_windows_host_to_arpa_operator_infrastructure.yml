@@ -1,0 +1,48 @@
+title: Reverse SSH Tunnel Established from Windows Host to ARPA Operator Infrastructure
+id: 6465d373-414d-461d-8624-11153cc64d9c
+status: experimental
+description: >-
+  Detects the establishment of a reverse SSH tunnel from a victim-side Windows host to the
+  Turkish ARPA operator's DigitalOcean VPS (209.38.205.158). The operator provided the
+  victim-side insider (Windows AD user [employee ID — suppressed]) with SSH keys (rca_key.pem / rca_key.ppk)
+  and instructions to deploy -R 18080:localhost:8089 tunnels. This gives the operator live
+  network access inside the victim's perimeter. SSH with reverse-forwarding flags initiated
+  from an enterprise Windows workstation to any external IP is abnormal; the specific
+  operator IP makes this a definitive true positive.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/turkish-arpa-openclaw-state-insurer-209.38.205.158-detections/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.lateral-movement
+    - attack.t1021.004
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.004
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_ssh:
+        Image|endswith:
+            - '\ssh.exe'
+            - '\putty.exe'
+            - '\plink.exe'
+    selection_tunnel:
+        CommandLine|contains:
+            - '-R 18080'
+            - '18080:localhost:8089'
+            - '209.38.205.158'
+    selection_arpa_session:
+        CommandLine|contains:
+            - 'ARPA_Tunnel'
+            - 'rca_key'
+    condition: selection_ssh and (selection_tunnel or selection_arpa_session)
+falsepositives:
+    - Authorized developer tunneling tools with similar flag patterns (verify against endpoint management)
+    - Legitimate reverse-tunnel software for remote support (verify endpoint ownership and destination IP)
+level: high
+

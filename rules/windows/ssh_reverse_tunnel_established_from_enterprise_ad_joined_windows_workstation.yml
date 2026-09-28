@@ -1,0 +1,45 @@
+title: SSH Reverse Tunnel Established from Enterprise AD-Joined Windows Workstation
+id: d49b3f9d-31e8-4ed8-8c62-87aba3aedd66
+status: experimental
+description: >-
+  Detects SSH or PuTTY processes on enterprise AD-joined Windows workstations establishing
+  reverse tunnel connections (-R flag) to external IP addresses. In the Turkish ARPA
+  operator campaign, an insider (Windows AD user [employee ID — suppressed]) was supplied with operator-provided
+  SSH keys and instructions to establish reverse tunnels from inside the victim organization's
+  network to 209.38.205.158:18080. Reverse SSH tunnels from enterprise workstations to
+  external IPs are a hunting-grade indicator of insider-facilitated external access
+  regardless of the specific destination IP, but require triage against authorized
+  developer tunneling use.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/turkish-arpa-openclaw-state-insurer-209.38.205.158-detections/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.lateral-movement
+    - attack.t1021.004
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_ssh_tools:
+        Image|endswith:
+            - '\ssh.exe'
+            - '\putty.exe'
+            - '\plink.exe'
+    selection_reverse_flag:
+        CommandLine|contains:
+            - ' -R '
+    filter_authorized_infra:
+        CommandLine|contains:
+            - '10.'
+            - '172.'
+            - '192.168.'
+    condition: selection_ssh_tools and selection_reverse_flag and not filter_authorized_infra
+falsepositives:
+    - Authorized developers using reverse SSH tunnels for remote development (verify against IT-authorized tunneling policy and destination IP allow-list)
+    - Remote support tools using SSH tunneling to authorized jump hosts
+level: medium
+

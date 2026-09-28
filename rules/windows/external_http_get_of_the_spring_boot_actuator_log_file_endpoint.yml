@@ -1,0 +1,33 @@
+title: External HTTP GET of the Spring Boot Actuator Log File Endpoint
+id: 9e4e2540-95c5-44a6-a433-add2bcba903f
+name: actuator_logfile_read_base
+status: experimental
+description: >-
+    Base rule (not alerting on its own): an external HTTP GET of the Spring
+    Boot Actuator logfile endpoint. Reading the live application log is
+    unremarkable in isolation, since operations teams do this routinely, but
+    paired with a preceding Jolokia logger-level write it is the retrieval
+    step of a log-manufacturing technique that turns verbose request and
+    response tracing into a harvestable data source.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/multivector-ecommerce-rce-toolkit-192-3-1-116-detections/
+author: The Hunters Ledger
+date: '2026-07-21'
+tags:
+    - attack.collection
+    - attack.t1213
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-stem|contains: '/actuator/logfile'
+    selection_success:
+        sc-status: 200
+    condition: selection and selection_success
+falsepositives:
+    - >-
+        Authorized operations or monitoring staff retrieving the log file from
+        an approved management network. Not alerting on its own; reviewed
+        only in combination with the preceding logger-level-write event via
+        the correlation rule.
+level: informational

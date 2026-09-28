@@ -1,0 +1,41 @@
+title: Cloudflared Access TCP Tunnel to Potentially Unauthorized Hostname
+id: 57ce00ce-d1ee-4621-9654-cefb4bf3b60d
+status: experimental
+description: >-
+  Detects cloudflared access tcp invocations on Linux server-class hosts referencing hostnames
+  outside an organizational allowlist. The UTA-2026-012 operator used cloudflared access tcp
+  --hostname windows_server.tralalarkefe.com and --hostname gil_dr1.tralalarkefe.com to
+  maintain persistent reverse-TCP tunnels to the victim machines for RDP and SSH.
+  This pattern allows persistent victim access without victim-side firewall rule changes.
+  Tune by adding your organization's known legitimate Cloudflare Tunnel hostnames to the
+  allowlist filter below.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/russian-gemini-credential-mill-213.165.51.115-detections/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+    - attack.command-and-control
+    - attack.t1090.004
+    - attack.t1572
+    - attack.lateral-movement
+    - attack.t1021.001
+    - attack.t1021.004
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/cloudflared'
+        CommandLine|contains|all:
+            - 'access'
+            - 'tcp'
+            - '--hostname'
+    filter_known_legit:
+        CommandLine|contains: 'your-org-tunnel.example.com'  # REPLACE with org's known CF Tunnel hostnames
+    condition: selection and not filter_known_legit
+falsepositives:
+    - Legitimate organizational Cloudflare Tunnel deployments — populate the allowlist filter with known tunnel hostnames
+    - Developer workstations running cloudflared for legitimate service exposure
+level: medium
+

@@ -1,0 +1,36 @@
+title: DceRpcSs Masquerading Service Installation
+id: c3d84e7f-2b61-4a99-8f3c-5d7e1b8c2a96
+status: experimental
+description: >-
+  Detects installation of a Windows service named DceRpcSs, which
+  masquerades as the legitimate RpcSs (Remote Procedure Call) service.
+  The Cobalt Strike Artifact Kit service variant registers under this
+  name to blend with built-in Windows services and survive casual
+  administrative review. The legitimate RpcSs service name does not
+  match DceRpcSs in any Windows version. The service name itself is an
+  operator-chosen value and may change in a future build or deployment.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.persistence
+    - attack.t1036.005
+    - attack.stealth
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+        ServiceName: 'DceRpcSs'
+    condition: selection
+falsepositives:
+    - >-
+      Unlikely — DceRpcSs is not a legitimate Windows service name; a
+      future campaign or unrelated actor reusing this exact masquerade
+      name would also match, so treat a hit as a lead requiring
+      corroboration rather than an automatic incident
+level: medium
+

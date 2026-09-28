@@ -1,0 +1,35 @@
+title: Operator TDS Landing URL Pattern - Parklogic Source-Referer Shape with Campaign Hash
+id: 3d6c9a7e-2f41-4b8d-c53e-9a1b7f3e5d28
+status: experimental
+description: >-
+  Detects the URL pattern used by the CVE-2026-41940 cPanel harvester operator's Parklogic
+  TDS traffic distribution system. The shape is /?d=<source-domain>&a=2143526812&s=<64-hex>
+  where d= is the source/referrer domain, a= is the operator's Parklogic affiliate account
+  ID (constant: 2143526812), and s= is a per-source-domain campaign hash (64 hex characters).
+  This shape routes victims from compromised or spoof landing pages through to phishing
+  destinations. The account ID is the sole discriminator that ties this shape to this specific
+  operator rather than any other Parklogic customer; without it the /?d=&s=<64-hex> shape
+  alone is generic Parklogic platform traffic.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-216-126-227-49-cve-2026-41940-cpanel-harvester-20260517/
+author: The Hunters Ledger
+date: 2026-05-17
+tags:
+    - attack.resource-development
+    - attack.t1583.008
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection_tds_shape:
+        c-uri-query|contains|all:
+            - 'a=2143526812'
+            - '&s='
+    selection_s_param_length:
+        c-uri-query|re: '[?&]s=[a-f0-9]{64}(&|$)'
+    condition: selection_tds_shape and selection_s_param_length
+falsepositives:
+    - Other Parklogic customers using the same platform with different a= values (filtered by the a=2143526812 requirement)
+    - Security researchers reproducing the operator's TDS chain in testing environments
+level: medium
+

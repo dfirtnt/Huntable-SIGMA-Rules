@@ -1,0 +1,50 @@
+title: HijackLoader GrimResource MMC Spawning Mshta or Rundll32 for Payload Execution
+id: b81e4c29-53a7-4d02-8f9e-2a7d6c4b1e35
+status: experimental
+description: >-
+  Detects MMC (Microsoft Management Console) spawning mshta.exe, rundll32.exe,
+  or a generic script/command interpreter as part of the GrimResource MSC file
+  weaponization technique used by the HijackLoader campaign. The observed MSC
+  files (1.msc, Price2.pdf.msc, MSCFile.msc) use the res://apds.dll/redirect.html
+  XSL redirect to execute javascript:eval(), which launches an interpreter from
+  mmc.exe as a parent. This parent-child relationship is abnormal — legitimate
+  MMC snap-ins do not spawn these interpreters.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1218.014
+    - attack.t1059
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\mmc.exe'
+        Image|endswith:
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    filter_legitimate_mmc:
+        CommandLine|contains:
+            - 'eventvwr.msc'
+            - 'compmgmt.msc'
+            - 'devmgmt.msc'
+            - 'diskmgmt.msc'
+    condition: selection and not filter_legitimate_mmc
+falsepositives:
+    - >-
+      Custom enterprise MMC snap-ins that legitimately spawn PowerShell or
+      cmd.exe for administrative actions (rare — verify the specific MSC
+      file source and the spawned command line for administrative context)
+    - Security monitoring tools that invoke MMC snap-ins programmatically
+level: high
+

@@ -1,0 +1,35 @@
+title: Discord Bot API Egress with Attack-Method Dispatch Payload from Server Host
+id: 7e3175bc-9a74-4c93-b358-de78d84250f4
+status: experimental
+description: >-
+  Detects Discord API (discord.com/api/v9/) egress traffic from non-developer server hosts, indicative of the Matrix C2 DDoS-as-a-Service Discord-bot customer interface (UTA-2026-014). The Discord bot dispatches DDoS attack commands on behalf of paying customers via a JavaScript bot running on the operator's VPS. Discord bot traffic from production server hosts in non-developer environments is anomalous and warrants investigation, but Discord bot hosting is also a common legitimate pattern — treat as a hunting lead requiring process-context correlation, not a standalone alert.
+references:
+    - https://the-hunters-ledger.com/reports/rovodev-mirai-matrix-c2-87.106.143.220/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.command-and-control
+    - attack.impact
+    - attack.t1498.001
+    - attack.execution
+    - attack.t1059.007
+    - detection.emerging-threats
+logsource:
+    category: network_connection
+    product: linux
+detection:
+    selection_discord:
+        DestinationHostname|contains: 'discord.com'
+        DestinationPort: 443
+        Initiated: 'true'
+    filter_known_dev:
+        Image|contains:
+            - '/node_modules/'
+            - 'discord.js'
+    condition: selection_discord and not filter_known_dev
+falsepositives:
+    - Legitimate Discord bots hosted on server infrastructure — all Discord bot deployments on production servers
+    - SaaS applications integrating Discord notifications
+    - Developer environments testing Discord integrations
+level: medium
+

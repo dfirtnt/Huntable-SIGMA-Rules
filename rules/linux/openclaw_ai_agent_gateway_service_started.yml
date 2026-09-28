@@ -1,0 +1,41 @@
+title: OpenClaw AI-Agent Gateway Service Started
+id: f6a6901a-73dc-49c9-8c05-5ca64aa89d23
+status: experimental
+description: >-
+  Detects invocation of the OpenClaw local-gateway service via the 'openclaw gateway
+  --port' command pattern, requiring both the openclaw binary image and the gateway/port
+  arguments together. The OpenClaw gateway functions as a local control-plane proxy
+  between Claude Code and downstream OpenClaw skills — its startup indicates the operator
+  has completed installation and is bringing up the AI-agent control plane. Observed as
+  allowlist entry 6 in the Korean-ClaudeCode-Allowlist-OpenClaw-221.150.15.104 campaign.
+  Legitimate adopters running the same gateway trigger this identically, so hits require
+  review rather than automatic alerting.
+references:
+    - https://the-hunters-ledger.com/reports/korean-claude-openclaw-221.150.15.104/
+    - https://the-hunters-ledger.com/hunting-detections/korean-claude-openclaw-221.150.15.104-detections/
+author: The Hunters Ledger
+date: '2026-05-27'
+tags:
+    - attack.command-and-control
+    - attack.t1090.001
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.t1685
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_image:
+        Image|endswith: '/openclaw'
+    selection_cmdline:
+        CommandLine|contains|all:
+            - 'gateway'
+            - '--port'
+    condition: selection_image and selection_cmdline
+falsepositives:
+    - >-
+      Legitimate OpenClaw adopters on developer-class workstations running the gateway
+      for sanctioned evaluation or use.
+level: medium
+

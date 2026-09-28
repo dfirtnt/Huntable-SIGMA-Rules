@@ -1,0 +1,29 @@
+title: Rhadamanthys SibCode Software Registry Key Persistence Marker
+id: a4f1e2c8-3d7b-4f9a-9c2e-2c5e7f8d9a01
+status: experimental
+description: >-
+  Detects creation or modification of HKU\<SID>\Software\SibCode\sn registry value, a family-stable
+  Rhadamanthys execution marker observed across multiple sibling Stage-2 sandbox runs (Dapato dropper
+  variants e827d13c, 457aecd8, bc9fe5e9). Per-instance value is a license/build timestamp from the MaaS
+  panel. No known benign software writes this key.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-79-137-192-3-20260515-detections/
+author: The Hunters Ledger
+date: 2026-05-15
+tags:
+    - attack.persistence
+    - attack.defense-impairment
+    - attack.t1112
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        TargetObject|contains: '\Software\SibCode\sn'
+    condition: selection
+falsepositives:
+    - >-
+      Unlikely. The SibCode\sn key path has no documented benign software using it.
+level: high
+

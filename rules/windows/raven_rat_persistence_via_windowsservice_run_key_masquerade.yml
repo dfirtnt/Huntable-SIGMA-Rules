@@ -1,0 +1,38 @@
+title: Raven RAT Persistence via WindowsService Run Key Masquerade
+id: 9ad1fd97-8a23-42fd-8ab6-210999dd6d9c
+status: experimental
+description: >-
+    Detects Raven RAT (custom Delphi RAT developed by the ZeroTrace cluster) establishing
+    persistence via a Run key entry named 'WindowsService' under
+    HKCU\Software\Microsoft\Windows\CurrentVersion\Run. This value name is a deliberate
+    masquerade intended to appear as a legitimate Windows service entry to casual inspection.
+    Raven RAT provides keylogging, hidden VNC desktop creation, cryptocurrency wallet theft
+    (Exodus, Atomic Wallet, Guarda, Wasabi), and SOCKS proxy capabilities. The value name is a
+    generic literal an operator can trivially rename in a future build, so this rule is scoped
+    as a hunting lead rather than a high-fidelity alert.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-74-0-42-25-20260316-detections/
+author: The Hunters Ledger
+date: 2026-03-17
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1547.001
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\CurrentVersion\Run\WindowsService'
+    filter_legitimate:
+        Details|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Poorly named legitimate software that uses 'WindowsService' as a Run key value name; validate that the target binary path is outside System32 and Program Files before actioning
+level: medium
+

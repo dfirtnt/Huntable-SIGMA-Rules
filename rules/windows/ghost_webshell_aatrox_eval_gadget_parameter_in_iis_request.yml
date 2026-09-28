@@ -1,0 +1,44 @@
+title: Ghost Webshell Aatrox Eval Gadget Parameter in IIS Request
+id: f2509a7c-9505-4b23-a2b4-b7619999f327
+status: experimental
+description: >-
+  Detects the Aatrox eval gadget parameter in the query string of IIS
+  web requests to .asp files, indicating interaction with the Ghost
+  xiao-zu ASP webshell (miss.asp) as staged in the FlaskC2-PostEx-Toolkit
+  campaign. The webshell stores and executes arbitrary VBScript via
+  Execute Session("Aatrox") when the Aatrox parameter is present.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/flaskc2-postex-toolkit-67-215-232-25-detections/
+author: The Hunters Ledger
+date: '2026-06-12'
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.stealth
+    - attack.t1027.010
+    - detection.emerging-threats
+logsource:
+    category: webserver
+    product: iis
+detection:
+    selection:
+        cs-uri-stem|endswith: '.asp'
+        cs-uri-query|contains: 'Aatrox'
+    condition: selection
+falsepositives:
+    - >-
+      Aatrox is a League of Legends champion name and could theoretically
+      appear in legitimate gaming-related web content; highly anomalous
+      as a query parameter against a corporate IIS .asp endpoint
+level: medium
+
+CVE-2026-20817 WER LPE PoC: Anomalous WerFault.exe Token Inspection
+
+Tier: Hunting
+Robustness: 2
+ATT&CK Coverage: T1068 (Exploitation for Privilege Escalation)
+Confidence: MODERATE
+Rationale: The process-access pattern (a non-WER process opening WerFault.exe’s token) is a genuine, durable technique signal, but the original assessment’s own FP Risk of HIGH and narrow applicability window (only relevant on hosts missing the January 2026 cumulative update, and the analyzed sample is a non-weaponized PoC that never achieves elevation) keep this at Hunting rather than Detection.
+False Positives: EDR and security tooling that monitors WerFault.exe token state. Crash reporting integrations that inspect WerFault process state. Only deploy on unpatched hosts (pre-January 2026 Windows cumulative update) — patched hosts render this moot.
+Deployment: Sysmon (Event ID 10 — ProcessAccess), EDR process-access telemetry. Deploy only on hosts running Windows 10/11 or Server 2019/2022 without the January 2026 cumulative update, or for retrospective hunting.
+

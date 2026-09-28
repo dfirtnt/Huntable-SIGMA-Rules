@@ -1,0 +1,48 @@
+title: Wscript To PowerShell To MSBuild Execution Chain Without Project File
+id: 4f593a7e-a980-452a-bc36-25db2acf2c7c
+status: experimental
+description: >-
+    Detects MSBuild.exe launched directly by a hidden, execution-policy-bypassed
+    PowerShell process with no build-project argument (no .csproj/.vbproj/.sln/.xml/
+    .proj/.targets path on the command line). Legitimate MSBuild invocations, even
+    from a shell, almost always pass a project or target path; a bare invocation is
+    consistent with using MSBuild as a hollow injection target rather than as a
+    build tool. Observed as the final stage of a wscript-launched fileless loader
+    chain that injects a custom .NET RAT into the resulting process.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1127.001
+    - attack.t1055
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\MSBuild.exe'
+        - OriginalFileName: 'MSBuild.exe'
+    selection_parent:
+        ParentImage|endswith: '\powershell.exe'
+        ParentCommandLine|contains:
+            - '-w hidden'
+            - '-windowstyle hidden'
+            - '-ep bypass'
+            - '-ExecutionPolicy Bypass'
+    filter_project_file:
+        CommandLine|contains:
+            - '.csproj'
+            - '.vbproj'
+            - '.sln'
+            - '.proj'
+            - '.targets'
+            - '.xml'
+    condition: all of selection_* and not filter_project_file
+falsepositives:
+    - Developer or CI tooling that launches MSBuild from a hidden PowerShell wrapper without a visible project path on the command line
+level: high
+

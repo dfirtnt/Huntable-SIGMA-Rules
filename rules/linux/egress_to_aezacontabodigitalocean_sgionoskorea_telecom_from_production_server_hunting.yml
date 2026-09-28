@@ -1,0 +1,36 @@
+title: Egress to AEZA/Contabo/DigitalOcean-SG/IONOS/Korea-Telecom from Production Server (Hunting)
+id: bb917d1e-bb95-48d2-bb19-505cd6655456
+status: experimental
+description: >-
+  Hunting rule flagging outbound connections from production server hosts to IP ranges
+  associated with the campaign's operator-hosting ASNs: AEZA International Group (Case 1
+  + Case 9), Contabo GmbH (Cases 5/6 demoted but infra tracked), DigitalOcean Frankfurt/
+  Singapore (Case 2 Turkish ARPA), 1&1 IONOS (Case 3 Pandora botnet), Korea Telecom
+  (Case 4 Korean operator). High FP rate as a standalone rule — combine with destination
+  port specificity to raise confidence.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.resource-development
+  - attack.t1583.003
+  - detection.emerging-threats
+logsource:
+  category: network_connection
+  product: linux
+detection:
+  selection_high_risk_asn:
+    DestinationIp|cidr:
+      - 213.165.0.0/16
+      - 77.110.0.0/16
+      - 209.38.0.0/16
+      - 87.106.0.0/16
+      - 221.150.0.0/16
+  condition: selection_high_risk_asn
+falsepositives:
+  - >-
+    CDN egress, legitimate cloud API traffic, third-party service integrations. Use as
+    a hunting pivot combined with destination port filters (mining ports, C2 elite ports).
+level: low
+

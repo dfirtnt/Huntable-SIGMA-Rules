@@ -1,0 +1,40 @@
+title: Non-Browser Process DNS Query to ip-api.com Hosting Detection Endpoint
+id: ce5a51b5-1221-4843-ac57-3fa2b15ffb69
+status: experimental
+description: |
+    Detects a non-browser process resolving ip-api.com, consistent with XWorm's anti-analysis
+    hosting detection check. XWorm 3.0-5.0 queries http://ip-api.com/line/?fields=hosting at
+    startup to determine whether the infected machine runs on hosting or datacenter infrastructure.
+    If the API returns "true", the malware silently exits via Environment.Exit(0) to evade sandbox
+    and researcher environments. A non-browser, non-network-tool process querying this specific
+    API is a strong indicator of sandbox evasion behavior.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.stealth
+    - attack.discovery
+    - attack.t1497.001
+    - detection.emerging-threats
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        QueryName|contains: 'ip-api.com'
+    filter_browser:
+        Image|endswith:
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+            - '\iexplore.exe'
+            - '\brave.exe'
+            - '\opera.exe'
+    condition: selection and not filter_browser
+falsepositives:
+    - Legitimate applications using ip-api.com for geolocation or network diagnostics
+    - Network monitoring and IT asset management tools that use ip-api.com as a data source
+    - Weather, travel, or location-aware desktop applications performing connectivity checks
+level: medium
+

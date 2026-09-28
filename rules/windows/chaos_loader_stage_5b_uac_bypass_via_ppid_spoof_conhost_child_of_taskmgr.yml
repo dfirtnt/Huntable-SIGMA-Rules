@@ -1,0 +1,39 @@
+title: Chaos Loader Stage-5b UAC Bypass via PPID Spoof — Conhost Child of Taskmgr
+id: 5e1a8d4c-b7f2-4a3e-c9d6-3f2b7e5a1c84
+status: experimental
+description: >-
+  Detects the Stage-5b UAC bypass used by the Chaos/TorBrowserTor private
+  crypter, which spawns conhost.exe with the --headless argument as a
+  child of elevated taskmgr.exe. The parent-child relationship is
+  established via PPID spoofing against an auto-elevated taskmgr.exe
+  instance, and the conhost process in turn launches cmd.exe re-executing
+  the dropper chain at HIGH integrity without triggering a UAC prompt.
+  This is a UACME technique #41 family implementation with only 8/77 VT
+  detections on the bypass module.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+    - https://github.com/hfiref0x/UACME
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.t1548.002
+    - attack.t1134.004
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\taskmgr.exe'
+        Image|endswith: '\conhost.exe'
+        CommandLine|contains: '--headless'
+    condition: selection
+falsepositives:
+    - >-
+      No known legitimate software spawns conhost.exe --headless as a
+      child of taskmgr.exe; treat any match as a high-confidence UAC
+      bypass event
+level: high
+

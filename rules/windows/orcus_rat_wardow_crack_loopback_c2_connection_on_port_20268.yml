@@ -1,0 +1,41 @@
+title: Orcus RAT Wardow Crack Loopback C2 Connection on Port 20268
+id: a9c6e3f8-b1d4-4a7c-c5e9-8f3b2d7a6c41
+status: experimental
+description: >-
+  Detects Orcus RAT v7 Wardow crack initiating a loopback TCP connection
+  to 127.0.0.1:20268, the tunneled C2 configuration observed in this
+  campaign at 94.103.1.13. The real upstream C2 is hidden behind a
+  chisel/plink SSH or HTTP tunnel; the Orcus client connects to the
+  loopback listener which relays traffic externally. The port number is
+  an operator-configured value for this campaign, not a crack-tool-wide
+  constant, and may differ in another deployment.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.command-and-control
+    - attack.t1090.001
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationIp: '127.0.0.1'
+        DestinationPort: 20268
+        Initiated: 'true'
+    filter_system:
+        Image|contains:
+            - '\Windows\System32\'
+            - '\Windows\SysWOW64\'
+    condition: selection and not filter_system
+falsepositives:
+    - Local development services on port 20268 in developer environments
+    - Automated testing frameworks using this loopback port
+    - >-
+      Tune by restricting to process images outside System32/SysWOW64;
+      the port is operator-configured and may differ in other campaigns
+level: medium
+

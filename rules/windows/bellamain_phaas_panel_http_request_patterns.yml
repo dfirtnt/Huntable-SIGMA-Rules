@@ -1,0 +1,34 @@
+title: BellaMain PhaaS Panel HTTP Request Patterns
+id: c7d4f0e1-5fab-6c1d-be4f-4e7fab0c1d23
+status: experimental
+description: >-
+  Detects HTTP requests to BellaMain panel administrative endpoints. The panel exposes a small fixed
+  set of PHP entry points (signin.php, dashboard.php, post.php, manager.php, cookie.php) that should
+  not appear on legitimate web traffic from internal endpoints. This selector is host-independent and
+  survives the panel being redeployed on new infrastructure. Pair with the IOC feed's blocklist for
+  79.137.192.3 and cryptone.bot for additional coverage of this specific deployment.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-79-137-192-3-20260515-detections/
+author: The Hunters Ledger
+date: 2026-05-15
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection_uri:
+        cs-uri-stem|contains:
+            - '/BellaMain/signin.php'
+            - '/BellaMain/dashboard.php'
+            - '/BellaMain/database/post.php'
+            - '/BellaMain/manager.php'
+            - '/BellaMain/database/cookie.php'
+    condition: selection_uri
+falsepositives:
+    - >-
+      Unlikely — the BellaMain panel PHP entry-point paths are bespoke and unlikely to
+      collide with legitimate proxy/web traffic.
+level: high
+

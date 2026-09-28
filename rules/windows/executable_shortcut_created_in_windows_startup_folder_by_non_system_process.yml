@@ -1,0 +1,37 @@
+title: Executable Shortcut Created in Windows Startup Folder by Non-System Process
+id: a3c91e72-8f44-4b19-bd52-1f6a3c9d7e08
+status: experimental
+description: |
+    Detects creation of a .lnk shortcut file inside the Windows Startup folder by a process
+    outside system-managed directories. XWorm 3.0-5.0 creates a startup shortcut at
+    %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\XWormClient.lnk via WScript.Shell
+    COM automation as one of three redundant persistence mechanisms. Legitimate software
+    installers creating startup shortcuts typically run from Program Files; a shortcut created
+    by a process running from a user-writable path is a strong indicator of malware persistence.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.009
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\Microsoft\Windows\Start Menu\Programs\Startup\'
+        TargetFilename|endswith: '.lnk'
+    filter_legitimate:
+        Image|startswith:
+            - 'C:\Windows\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Software installers running from user-writable staging directories that create startup shortcuts as part of setup
+    - Legitimate update managers or tray applications deployed outside Program Files that add startup shortcuts
+level: medium
+

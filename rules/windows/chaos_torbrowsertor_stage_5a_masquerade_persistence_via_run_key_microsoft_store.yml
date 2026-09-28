@@ -1,0 +1,40 @@
+title: Chaos TorBrowserTor Stage-5a Masquerade Persistence via Run Key Microsoft Store
+id: 8f2c5a1e-d4b7-4e9c-a6f3-2d8b1e7c4f96
+status: experimental
+description: >-
+  Detects Stage-5a Chaos/TorBrowserTor ransomware persistence via a Run
+  key value named 'Microsoft Store' under
+  HKCU\Software\Microsoft\Windows\CurrentVersion\Run, pointing to
+  svchost.exe or projectxx.exe in %APPDATA%. The mymain build copies
+  itself to %APPDATA%\svchost.exe and the myfile build to
+  %APPDATA%\projectxx.exe. Both the value name and the self-copy
+  filenames are build-specific and may rotate in a future release.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1547.001
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains:
+            - '\Software\Microsoft\Windows\CurrentVersion\Run\Microsoft Store'
+        Details|contains:
+            - '\AppData\Roaming\svchost.exe'
+            - '\AppData\Roaming\projectxx.exe'
+    condition: selection
+falsepositives:
+    - >-
+      No known legitimate software creates a Run key named 'Microsoft
+      Store' pointing to svchost.exe or projectxx.exe in %APPDATA% for
+      these builds; a future build renaming either value evades this rule
+level: medium
+

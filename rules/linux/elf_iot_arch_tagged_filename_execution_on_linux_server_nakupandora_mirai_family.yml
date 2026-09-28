@@ -1,0 +1,61 @@
+title: ELF IoT Arch-Tagged Filename Execution on Linux Server — Naku/Pandora Mirai Family
+id: c4495249-9b11-406c-b4ca-5c099eb8ca81
+status: experimental
+description: >-
+  Detects execution of ELF binaries with IoT-targeted architecture-tag suffixes (arm5, arm6, arm7, m68k, mips, mpsl, ppc, sh4, spc) associated with the Naku/Pandora-Mirai 11-architecture IoT botnet family (UTA-2026-014). These filenames (Naku.{arch}, pandora.{arch}, nig) are specific to the Pandora-Mirai dropper's payload distribution and execution pattern. Execution of such binaries on server-class hosts indicates active compromise and botnet payload staging.
+references:
+    - https://the-hunters-ledger.com/reports/rovodev-mirai-matrix-c2-87.106.143.220/
+    - https://vms.drweb.com/virus/?i=22410691&lng=en
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.initial-access
+    - attack.t1190
+    - attack.command-and-control
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_naku:
+        Image|contains:
+            - 'Naku.arm'
+            - 'Naku.m68k'
+            - 'Naku.mips'
+            - 'Naku.mpsl'
+            - 'Naku.ppc'
+            - 'Naku.sh4'
+            - 'Naku.spc'
+            - 'Naku.x86'
+            - 'pandora.arm'
+            - 'pandora.m68k'
+            - 'pandora.mips'
+            - 'pandora.mpsl'
+            - 'pandora.sh4'
+            - 'pandora.spc'
+    selection_argv:
+        CommandLine|contains:
+            - 'PandoraNet'
+            - './nig realtek'
+            - './nig huawei'
+            - 'pandora_bot'
+    condition: 1 of selection_*
+falsepositives:
+    - Cross-compilation test environments deploying IoT firmware — limit to production server hosts and IoT-adjacent network segments
+    - IoT development workstations building multi-arch toolchains
+level: high
+
+Hidden-Prefix Cron Entry Creation in /etc/cron.d: Pandora-Mirai Persistence Pattern
+
+Tier: Detection
+Robustness: 3
+ATT&CK Coverage: T1053.003 (Cron), T1564.001 (Hidden Files and Directories)
+Confidence: HIGH
+Rationale: A pure technique-level signal — dot-prefix hidden cron entries in /etc/cron.d/ — with zero operator-specific literals (no IP, no domain, no bespoke filename). Survives complete infrastructure rotation and full binary/campaign rebrand; only a change in the persistence technique itself would evade. Unchanged from the original file.
+False Positives: Extremely rare legitimate administration scripts that use dot-prefix cron files — review all instances; configuration management tools (Puppet, Chef, Ansible) deploying hidden cron entries — verify against known CM policy.
+Blind Spots: Persistence via a non-hidden cron filename, or via a different mechanism entirely, is not covered by this rule.
+Validation: Trigger creation of a dot-prefix file under /etc/cron.d/ — must match; a legitimate .placeholder file (or your environment’s known CM hidden-file convention) must NOT fire once filtered.
+Deployment: EDR/Sysmon-equivalent file-creation telemetry on Linux hosts.
+

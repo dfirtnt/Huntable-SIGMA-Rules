@@ -1,0 +1,47 @@
+title: BellaMain PhaaS Mysqldump Invocation by PHP Web Process
+id: c914e7a2-5b36-4f87-b3d8-2a1e9c047f83
+status: experimental
+description: >-
+  Detects mysqldump invoked with a plaintext -p password argument by a PHP or
+  web server parent process. BellaMain's /yedek Telegram command executes
+  mysqldump via PHP shell_exec() to produce a SQL backup that is then sent to
+  the operator's Telegram channel via sendDocument. Legitimate database backup
+  jobs run under dedicated service accounts with credential files rather than
+  plaintext -p arguments spawned from a web-server process. This combination
+  of parent process (php/php-fpm/apache2/nginx) and mysqldump child with a
+  -p flag is a strong behavioral indicator that does not depend on any single
+  renameable literal.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/bellamain-turkish-phaas-79-137-192-3-20260516-detections/
+author: The Hunters Ledger
+date: '2026-05-16'
+tags:
+    - attack.collection
+    - attack.t1560
+    - attack.stealth
+    - attack.t1070
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent:
+        ParentImage|contains:
+            - 'php'
+            - 'apache2'
+            - 'nginx'
+            - 'httpd'
+    selection_child:
+        Image|endswith: 'mysqldump'
+        CommandLine|contains: '-p'
+    condition: selection_parent and selection_child
+falsepositives:
+    - >-
+      Legitimate PHP-based database management tools (phpMyAdmin export
+      function) invoked by an administrator — correlate with legitimate admin
+      session timestamps and exclude known-good source IPs
+    - >-
+      Automated backup scripts incorrectly launched from web process context
+      during provisioning or testing
+level: high
+

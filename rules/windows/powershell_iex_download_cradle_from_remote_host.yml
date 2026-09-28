@@ -1,0 +1,35 @@
+title: PowerShell IEX Download Cradle From Remote Host
+id: d8c4a085-a8d2-44ae-a76c-eb509ca19067
+status: experimental
+description: >-
+    Detects a PowerShell download-and-execute cradle combining Invoke-Expression with a web
+    request. The GOCLOUD one-click installer uses an iex plus Invoke-WebRequest cradle to pull
+    and run allinone.ps1. Broad; intended for hunting.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.execution
+    - attack.command-and-control
+    - attack.t1059.001
+    - attack.t1105
+logsource:
+    category: ps_script
+    product: windows
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_iex:
+        ScriptBlockText|contains:
+            - 'IEX '
+            - 'Invoke-Expression'
+    selection_web:
+        ScriptBlockText|contains:
+            - 'iwr '
+            - 'Invoke-WebRequest'
+            - 'DownloadString'
+    condition: all of selection_*
+falsepositives:
+    - Provisioning scripts that fetch and run remote code
+level: medium
+

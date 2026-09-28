@@ -1,0 +1,30 @@
+title: Endpoint Protection Service Stopped Or Disabled
+id: 657adc6d-37b1-481d-8ff5-c13278c9c359
+status: experimental
+description: >-
+  Detects a Windows service-control-manager event stopping or disabling one of a set of
+  endpoint-protection service names. Individually common during legitimate maintenance;
+  several such events on one host within a short window is the actual campaign signature
+  and needs analyst correlation this single-event rule cannot perform.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: windows
+    service: system
+    definition: 'Requires the Windows System event log (Service Control Manager source), EventID 7036 (service entered stopped state) or 7040 (service start type changed).'
+detection:
+    selection:
+        EventID:
+            - 7036
+            - 7040
+        Provider_Name: 'Service Control Manager'
+    condition: selection
+falsepositives:
+    - Scheduled, change-controlled endpoint-agent maintenance, upgrade, or uninstall
+level: medium
+

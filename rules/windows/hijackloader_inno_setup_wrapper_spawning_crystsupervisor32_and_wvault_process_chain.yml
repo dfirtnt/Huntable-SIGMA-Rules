@@ -1,0 +1,48 @@
+title: HijackLoader Inno Setup Wrapper Spawning CrystSupervisor32 and WVault Process Chain
+id: 3a7f1e92-bb04-4d85-9c3e-f6a820d14c73
+status: experimental
+description: >-
+  Detects the HijackLoader/Penguish/Rugmi loader chain initiated by an Inno
+  Setup wrapper using the Pascal Script InitializeSetup->WinExec->return
+  False anti-triage technique. The wrapper drops and immediately launches
+  CrystSupervisor32.exe (renamed genuine Wondershare SlideShowEditor.exe)
+  from a temporary is-*.tmp directory. The chain continues through
+  WVault.exe (renamed signed Qihoo 360 PromoUtil.exe) used as the hollow
+  host for an injected .NET AsyncRAT-class RAT. The installer exits
+  silently with no wizard UI, defeating sandboxes that wait for
+  wizard-completion or [Run] section events.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1036.005
+    - attack.t1574.001
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_crystsupervisor:
+        Image|endswith: '\CrystSupervisor32.exe'
+        ParentImage|contains: '\is-'
+    selection_wvault_child:
+        Image|endswith: '\WVault.exe'
+        ParentImage|endswith: '\CrystSupervisor32.exe'
+    selection_wvault_parent_temp:
+        Image|endswith: '\WVault.exe'
+        ParentCommandLine|contains: 'is-'
+    condition: selection_crystsupervisor or selection_wvault_child or selection_wvault_parent_temp
+falsepositives:
+    - >-
+      Legitimate Wondershare software installers that use CrystSupervisor32.exe
+      as part of genuine DVD Creator or SlideShow Editor installation (verify
+      Authenticode chain and parent install path matches official Wondershare
+      installer, not a temp directory)
+    - >-
+      Qihoo 360 software installations where PromoUtil.exe is legitimately
+      renamed (verify install path is under Program Files, not C:\ProgramData\)
+level: medium
+

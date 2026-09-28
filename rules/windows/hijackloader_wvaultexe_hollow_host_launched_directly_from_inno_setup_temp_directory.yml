@@ -1,0 +1,39 @@
+title: HijackLoader WVault.exe Hollow-Host Launched Directly from Inno Setup Temp Directory
+id: c45f9d2e-8b16-4c53-a97b-7e3f1d9c6b42
+status: experimental
+description: >-
+  Detects WVault.exe (renamed, signed Qihoo 360 PromoUtil.exe used as a
+  hollow host for an injected .NET AsyncRAT-class RAT) launched with a
+  parent process image path containing the Inno Setup temp-extraction
+  marker "is-", indicating a direct launch from an is-*.tmp\ directory
+  rather than the campaign's persistent C:\ProgramData\adv_ctrl\ location.
+  This is a distinct chain link from — not a duplicate of — the broader
+  Inno Setup process-tree rule, which also covers WVault.exe as a direct
+  child of CrystSupervisor32.exe.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.t1055.012
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\WVault.exe'
+        ParentImage|contains: 'is-'
+    condition: selection
+falsepositives:
+    - >-
+      Legitimate Wondershare software chains where a similarly-launched
+      process runs from an Inno Setup temp directory in genuine DVD
+      Creator workflows (verify the file hashes and install path: the
+      legitimate chain runs from Program Files, not is-*.tmp or
+      C:\ProgramData\adv_ctrl\)
+level: medium
+

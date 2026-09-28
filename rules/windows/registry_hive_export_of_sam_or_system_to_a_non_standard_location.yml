@@ -1,0 +1,34 @@
+title: Registry Hive Export of SAM or SYSTEM to a Non-Standard Location
+id: 70038c48-829c-4a9c-bab4-540720e0a9b6
+status: experimental
+description: >-
+    Detects reg.exe exporting the SAM or SYSTEM registry hive, the
+    credential-theft precursor to offline extraction of local password
+    hashes. Observed in this campaign with the destination inside a web
+    server document root so the dump could be retrieved over HTTP.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+author: The Hunters Ledger
+date: 2026-08-17
+tags:
+    - attack.credential-access
+    - attack.t1003.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith: '\reg.exe'
+    selection_cmd:
+        CommandLine|contains: 'save'
+    selection_hive:
+        CommandLine|contains:
+            - 'HKLM\SAM'
+            - 'HKLM\SYSTEM'
+    condition: all of selection_*
+falsepositives:
+    - Scheduled or scripted backup jobs that export the SAM or SYSTEM hive to a controlled backup location
+level: high
+
+File name: proc_creation_win_reg_save_sam_system_webroot.yml
+

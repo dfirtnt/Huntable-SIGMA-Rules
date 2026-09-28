@@ -1,0 +1,55 @@
+title: GenAI Chatbot API SSRF to Cloud Instance Metadata Service
+id: a4d9593e-c9d3-4b6e-b7b1-ade367aad108
+status: experimental
+description: >-
+    Detects a POST request to a chat-completion or file-upload API endpoint whose body
+    references a cloud instance metadata service address. The operator in this campaign
+    attempted server-side request forgery by embedding an instance-metadata URL in a
+    natural-language chatbot prompt, using the language model as a relay to reach the
+    metadata service, and separately by submitting the same URL to an upload endpoint's
+    url field. The attacker-controlled URL travels in the request body rather than the
+    query string, so request-body capture is required.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/seasia-gov-exploitation-toolkit-144-172-106-236-detections/
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+author: The Hunters Ledger
+date: 2026-08-27
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.credential-access
+    - attack.t1552.005
+    - stp.3
+logsource:
+    category: webserver
+    definition: >-
+        Requires request-body capture. Standard web-server access logs (NCSA combined,
+        IIS W3C) record only the request line, so a metadata URL carried in a POST body
+        is invisible to them and this rule cannot fire against them. It applies to a WAF,
+        API gateway, reverse proxy, or LLM gateway audit log configured to log request
+        bodies, where that body text is searchable alongside the request fields.
+detection:
+    selection_endpoint:
+        cs-method: 'POST'
+        cs-uri-stem|contains:
+            - '/api/chat'
+            - '/api/v1/chat'
+            - '/api/v1/completions'
+            - '/chat/completions'
+            - '/api/upload'
+    keywords_metadata_target:
+        - '169.254.169.254'
+        - 'metadata.google.internal'
+        - '/latest/meta-data/'
+        - '/computeMetadata/v1/'
+    condition: selection_endpoint and keywords_metadata_target
+falsepositives:
+    - >-
+      A user legitimately asking an internal assistant about the cloud instance metadata
+      service, for example how to restrict access to it. Uncommon, and the request body
+      makes the intent clear on review
+    - >-
+      Authorized security testing of the chatbot integration's server-side request forgery
+      resistance
+level: high
+

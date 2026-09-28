@@ -1,0 +1,27 @@
+title: Winlogon SpecialAccounts UserList Registry Write
+id: 2966dbb8-8da1-492d-aeea-9921679ed4b6
+status: experimental
+description: >-
+    Detects a write to the Winlogon SpecialAccounts\UserList registry key, which
+    hides the named account from the Windows logon screen and User Manager tile.
+    This key is written almost exclusively to hide a newly created backdoor
+    account, legitimate use (hiding a genuine service account) is rare enough that
+    any write to this key merits review regardless of which account is targeted.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.stealth
+    - attack.t1564.002
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\SpecialAccounts\UserList'
+    condition: selection
+falsepositives:
+    - Deliberate administrative hiding of a legitimate local service account from the logon screen
+level: high
+

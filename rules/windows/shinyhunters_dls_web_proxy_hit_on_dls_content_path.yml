@@ -1,0 +1,45 @@
+title: ShinyHunters DLS — Web Proxy Hit on DLS Content Path
+id: f9426448-3e1b-402e-8a1a-996b06c73be0
+status: experimental
+description: >-
+  Detects HTTP proxy requests containing the ShinyHunters DLS
+  content-directory path (/pay_or_leak/) or ransom-note filename
+  (INFORMATION.txt). These path tokens are specific to the DLS
+  web-application structure and remain valid even if the underlying
+  hosting IP or domain rotates. A hit from an internal host indicates
+  retrieval of ransom materials following extortion contact or active
+  exfiltration confirmation by a threat actor using a compromised
+  endpoint.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shinyhunters-dls-91-215-85-22-20260417-detections/
+author: The Hunters Ledger
+date: 2026-04-17
+tags:
+    - attack.exfiltration
+    - attack.impact
+    - attack.t1657
+    - attack.t1485
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection:
+        cs-uri-stem|contains:
+            - '/pay_or_leak/'
+            - 'INFORMATION.txt'
+    condition: selection
+falsepositives:
+    - Threat intelligence analysts or security researchers manually retrieving DLS content for analysis
+    - Automated threat-intel crawler services indexing extortion infrastructure
+    - A coincidentally-named INFORMATION.txt on an unrelated internal or third-party web application
+level: medium
+
+ShinyHunters DLS: Salesforce Bulk Export OAuth App Authorization
+
+Tier: Hunting
+Robustness: 2
+ATT&CK Coverage: T1528 (Steal Application Access Token), T1213 (Data from Information Repositories)
+Confidence: MODERATE — requires Salesforce Shield / Event Monitoring to be enabled; app-name matching depends on how third-party OAuth clients are registered.
+Rationale: The ShinyHunters 2026 campaign relied on vishing to convince helpdesk staff to authorize Salesforce bulk-export OAuth connected apps. This rule targets ConnectedApp authorization events matching DataLoader/DataExporter/DataImporter/Bulk API name patterns (native Salesforce DataLoader filtered), a durable technique-level anchor, but legitimate ETL/data-migration projects genuinely use apps with these name patterns — real, expected benign hits keep this Hunting.
+False Positives:
+

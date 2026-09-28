@@ -1,0 +1,39 @@
+title: HTTP Request to a Sensitive Administrative or System-Information Route
+id: bdad563c-44c7-45f1-9a39-d8a1d31081bf
+name: sensitive_admin_route_probe_base
+status: experimental
+description: >-
+    Base rule (not alerting on its own): an HTTP request to an
+    administrative, configuration, debug or system-information API route.
+    Legitimate admin users browse these routes routinely. Paired above with
+    the account registration rule and a correlation that flags the same
+    source registering a new account and then probing these routes within
+    minutes, since administrative routes should not be the first thing a
+    brand-new account touches.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/multivector-ecommerce-rce-toolkit-192-3-1-116-detections/
+author: The Hunters Ledger
+date: '2026-07-21'
+tags:
+    - attack.initial-access
+    - attack.stealth
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1078
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-stem|contains:
+            - '/api/admin'
+            - '/api/users'
+            - '/api/config'
+            - '/api/system/info'
+            - '/api/debug'
+    condition: selection
+falsepositives:
+    - >-
+        A legitimate administrator's normal use of the application's own
+        admin panel. Not alerting on its own; reviewed only in combination
+        with the preceding registration event via the correlation rule.
+level: informational

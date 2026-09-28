@@ -1,0 +1,35 @@
+title: KAIDO RAT Self-Deletion of Zone.Identifier Alternate Data Stream
+id: d428415f-5926-466a-abcb-5cb91be4d187
+status: experimental
+description: >-
+  Detects a process deleting its own Zone.Identifier alternate data
+  stream shortly after launch, a Mark-of-the-Web bypass technique used
+  by the KAIDO Quasar-fork RAT to suppress SmartScreen re-checks on
+  subsequent executions. Anchored on the file-delete event rather than
+  file creation to avoid matching every downloaded file.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/kaido-quasar-rat-detections/
+author: The Hunters Ledger
+date: 2026-07-03
+tags:
+    - attack.defense-impairment
+    - attack.t1553.005
+    - detection.emerging-threats
+logsource:
+    category: file_delete
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith: ':Zone.Identifier'
+    filter_legit_installer:
+        Image|contains:
+            - '\Windows\System32\'
+            - '\Program Files\Windows Defender\'
+    condition: selection and not filter_legit_installer
+falsepositives:
+    - >-
+      Self-updating legitimate software (browsers, some installers) that
+      clears its own Zone.Identifier stream after a user-consented first run
+    - Administrative scripts that bulk-clear MOTW on downloaded files
+level: medium
+

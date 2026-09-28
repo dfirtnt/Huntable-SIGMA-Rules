@@ -1,0 +1,39 @@
+title: CVE-2026-20817 WER LPE PoC Token Inspection of WerFault.exe
+id: ff8ee6c2-d705-4ebf-98bd-6ead3d775ae0
+status: experimental
+description: >-
+  Detects process access events targeting WerFault.exe with token query rights,
+  consistent with the CVE-2026-20817 WER ALPC local-privilege-escalation PoC
+  present in the FlaskC2-PostEx-Toolkit campaign. The PoC enumerates processes
+  looking for WerFault.exe and inspects its token privileges. This rule is
+  relevant only on hosts missing the January 2026 Windows cumulative update;
+  the sample analyzed is non-weaponized and does not achieve elevation.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/flaskc2-postex-toolkit-67-215-232-25-detections/
+    - https://github.com/oxfemale/CVE-2026-20817
+    - https://itm4n.github.io/cve-2026-20817-wersvc-eop/
+author: The Hunters Ledger
+date: '2026-06-12'
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - detection.emerging-threats
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\WerFault.exe'
+        GrantedAccess|contains: '0x20'
+    filter_system:
+        SourceImage|endswith:
+            - '\WerMgr.exe'
+            - '\svchost.exe'
+            - '\MsMpEng.exe'
+    condition: selection and not filter_system
+falsepositives:
+    - EDR and security tooling that monitors WerFault.exe token state
+    - Crash reporting integrations that inspect WerFault process state
+    - Only deploy on unpatched hosts (pre-January 2026 Windows cumulative update)
+level: low
+

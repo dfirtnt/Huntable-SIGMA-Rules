@@ -1,0 +1,37 @@
+title: Hysteria V2 QUIC Proxy Process Execution on Linux Server
+id: e01c6689-1d47-4f6c-bf23-a71b32d88375
+status: experimental
+description: >-
+    Detects execution of Hysteria v2 process on a Linux host. The GHOST cryptojacker
+    kit installs Hysteria v2 as a covert QUIC/UDP backdoor with bing.com SNI masquerade
+    (ports 14433/14444 UDP) using hyst.sh installer. Hysteria v2 is legitimate dual-use
+    software; execution on a production GPU server or ML workload host with no expected
+    business purpose is a scoping lead for GHOST kit compromise, not a malware-specific
+    signature on its own. The process is installed as systemd service
+    hysteria-server.service with binaries in /usr/local/bin/hysteria.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/ghost-cryptojacker-vova75rus-77.110.96.200-detections/
+    - https://censys.com/ghost-cryptojacker-targeting-ai
+author: The Hunters Ledger
+date: 2026-05-25
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_hysteria:
+        Image|endswith: '/hysteria'
+    selection_hysteria_service:
+        CommandLine|contains: 'hysteria-server'
+    condition: selection_hysteria or selection_hysteria_service
+falsepositives:
+    - >-
+      Legitimate Hysteria v2 usage for censorship circumvention by employees
+      in restrictive-internet regions (rare in corporate GPU environments;
+      verify with owner)
+    - Authorized network testing using Hysteria for VPN / proxy research purposes
+level: medium
+

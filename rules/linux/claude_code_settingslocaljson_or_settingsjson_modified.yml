@@ -1,0 +1,37 @@
+title: >-
+  Claude Code settings.local.json or settings.json Modified
+id: 803d43fe-6b5a-48e1-b25f-9da5e74bca62
+status: experimental
+description: >-
+  Detects modification of a Claude Code permissions file (settings.local.json /
+  settings.json). File-event telemetry cannot inspect the file content, so this is
+  a hunting lead: after it fires, review whether the change added an auto-approved
+  dangerous command (for example a curl-to-shell pattern) to the permissions
+  allow-list.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.stealth
+  - attack.persistence
+  - attack.defense-impairment
+  - attack.t1685
+  - detection.emerging-threats
+logsource:
+  category: file_event
+  product: linux
+detection:
+  selection:
+    TargetFilename|contains:
+      - /.claude/settings.local.json
+      - /.claude/settings.json
+  condition: selection
+falsepositives:
+  - >-
+    Routine or legitimate edits to Claude Code settings (common) — review the
+    added permission entries. Investigate file content after alert — the
+    curl-pipe-bash and npm-i-g-unfamiliar patterns are the high-confidence indicators
+    within a triggered file modification.
+level: medium
+

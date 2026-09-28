@@ -1,0 +1,40 @@
+title: Command Shell Spawned by a Web Server or Application Server Process
+id: 06f9b3ec-3102-4abd-bc06-cbe8310a6495
+status: experimental
+description: >-
+    Detects cmd.exe or powershell.exe spawned directly by a web server or
+    Java application server process, consistent with a webshell or an
+    unauthenticated remote-code-execution vulnerability such as
+    CVE-2024-36401 in GeoServer being used to execute operating-system
+    commands.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+    - https://nvd.nist.gov/vuln/detail/CVE-2024-36401
+author: The Hunters Ledger
+date: 2026-08-17
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1059.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\httpd.exe'
+            - '\java.exe'
+            - '\javaw.exe'
+            - '\w3wp.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+    condition: all of selection_*
+falsepositives:
+    - Application performance monitoring or health-check agents integrated into the web server that intentionally spawn a shell
+    - Legitimate administrative scripting hooked into an IIS or Java application-server deployment pipeline
+level: high
+
+File name: proc_creation_win_shell_spawned_from_webserver_process.yml
+

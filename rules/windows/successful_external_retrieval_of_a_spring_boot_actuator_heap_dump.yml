@@ -1,0 +1,39 @@
+title: Successful External Retrieval of a Spring Boot Actuator Heap Dump
+id: f872347d-00cd-463e-9817-96d4ef96f205
+status: experimental
+description: >-
+    Detects a successful, large-bodied external response from the Spring Boot
+    Actuator heapdump endpoint, or a Jolokia HotSpotDiagnostic dumpHeap
+    invocation. A heap dump commonly contains in-memory credentials, session
+    tokens and business data; this rule keys on confirmed success, a 200
+    status with a large response body, rather than the request alone, since
+    the request is trivially made and often blocked by an auth filter.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/multivector-ecommerce-rce-toolkit-192-3-1-116-detections/
+author: The Hunters Ledger
+date: '2026-07-21'
+tags:
+    - attack.collection
+    - attack.t1005
+    - attack.credential-access
+    - attack.t1552.001
+logsource:
+    category: webserver
+detection:
+    selection_path:
+        cs-uri-stem|contains:
+            - '/actuator/heapdump'
+            - '/heapdump'
+    selection_jolokia_dumpheap:
+        cs-uri|contains: 'HotSpotDiagnostic'
+    selection_success:
+        sc-status: 200
+    selection_large_body:
+        sc-bytes|gte: 1000000
+    condition: (selection_path or selection_jolokia_dumpheap) and selection_success and selection_large_body
+falsepositives:
+    - >-
+        Authorized developer or support engineer pulling a heap dump for
+        legitimate memory-leak diagnosis from an approved internal source.
+level: high
+

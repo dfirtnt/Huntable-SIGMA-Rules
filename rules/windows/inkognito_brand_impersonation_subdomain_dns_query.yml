@@ -1,0 +1,48 @@
+title: Inkognito Brand-Impersonation Subdomain DNS Query
+id: 4a7b2e1d-8f3c-4a5b-9c0d-6e2f1a8b3c7d
+status: experimental
+description: >-
+  Detects DNS queries for any subdomain of inklens.ru, the Inkognito fraud
+  operator's (UTA-2026-009) dedicated brand-impersonation phishing platform.
+  The operator pre-stages 467+ subdomains targeting Wells Fargo, Tencent,
+  AnyDesk, Outlook Web Access 2013, Jenkins, Asana, Tele2, and other
+  enterprise/consumer brands, and adds new subdomains continuously.
+  Anchored on the wildcard parent zone rather than an enumerated subdomain
+  list so the rule survives new subdomain additions; a filter excludes the
+  operator's own internal DevOps tooling subdomains (argo-cd, redis-commander,
+  staging/uat/prod-prefixed hosts) hosted on the same zone.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/inkognito-russian-vpn-phishing-185-221-196-118-20260516-detections/
+author: The Hunters Ledger
+date: 2026-05-16
+tags:
+    - attack.initial-access
+    - attack.stealth
+    - attack.t1566.002
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection_inklens_subdomain:
+        QueryName|endswith: '.inklens.ru'
+    filter_operator_devops:
+        QueryName|startswith:
+            - 'argo-cd.'
+            - 'redis-commander.'
+            - 'redisinsight.'
+            - 'staging-agent.'
+            - 'staging-analytic.'
+            - 'uat-aka.'
+            - 'uat-dashboard.'
+            - 'prod-aka.'
+            - 'integration-cicd.'
+            - 'app-admin.'
+            - 'vfemea-admin.'
+    condition: selection_inklens_subdomain and not filter_operator_devops
+falsepositives:
+    - Security researchers or threat hunters explicitly querying inklens.ru subdomains for investigation purposes
+    - Automated scanner infrastructure probing known-bad domain lists
+level: high
+

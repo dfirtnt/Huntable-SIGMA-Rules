@@ -1,0 +1,30 @@
+title: Offensive Tooling Execution on Server Host
+id: 2fa74c68-e65d-46b3-b516-cc12400ddaee
+name: offensive_tooling_exec_serverhost
+status: experimental
+description: >-
+    Base rule (not alerting on its own): execution of offensive/network tooling
+    (nuclei, frpc/frps, masscan, nmap). Paired with the correlation rule below.
+references:
+    - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+    - attack.resource-development
+    - attack.t1588.002
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_offensive_tools:
+        Image|endswith:
+            - /nuclei
+            - /frpc
+            - /frps
+            - /masscan
+            - /nmap
+    condition: selection_offensive_tools
+falsepositives:
+    - Authorized security testing or network administration on the host
+level: low

@@ -1,0 +1,33 @@
+title: PuTTY Saved Session Created with ARPA Tunnel Naming Convention
+id: 785967aa-4fba-4679-8209-53c0f22b0631
+status: experimental
+description: >-
+  Detects creation of PuTTY saved sessions in the Windows registry with operator-distinctive
+  naming patterns. The Turkish ARPA operator instructed the victim-side insider to create a
+  PuTTY saved session named 'ARPA_Tunnel' targeting operator VPS 209.38.205.158 with
+  operator-supplied private key (rca_key.ppk). Registry creation of a PuTTY session named
+  ARPA_Tunnel or containing the operator IP is a definitive indicator of the insider
+  deployment phase of this campaign.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/turkish-arpa-openclaw-state-insurer-209.38.205.158-detections/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.lateral-movement
+    - attack.t1021.004
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_putty_path:
+        TargetObject|contains: '\Software\SimonTatham\PuTTY\Sessions\'
+    selection_arpa_session:
+        TargetObject|contains: 'ARPA_Tunnel'
+    condition: selection_putty_path and selection_arpa_session
+falsepositives:
+    - Legitimate administrators creating PuTTY sessions for authorized remote management with similar names (verify session destination and key file)
+level: high
+

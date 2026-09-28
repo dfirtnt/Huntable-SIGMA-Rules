@@ -1,0 +1,26 @@
+title: WordPress wp-login.php POST Request (Correlation Base)
+id: c6ff58ec-caa8-43e8-a73d-7869abcae0eb
+status: experimental
+description: >-
+  Base selection for the Mass WordPress Credential Validation Rate correlation rule below.
+  Matches individual HTTP POST requests to /wp-login.php — not alerting-grade on its own
+  (a single login POST is ordinary WordPress traffic); tier Hunting/informational, serves
+  only as the correlation's input event.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/russian-gemini-credential-mill-213.165.51.115-detections/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+    - attack.credential-access
+    - attack.t1110.003
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-stem|contains: '/wp-login.php'
+        cs-method: 'POST'
+    condition: selection
+falsepositives:
+    - Any single legitimate login attempt to a WordPress site — not anomalous in isolation; see the correlation rule for the rate-based signal
+level: informational

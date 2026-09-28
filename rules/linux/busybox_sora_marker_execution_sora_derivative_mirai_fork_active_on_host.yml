@@ -1,0 +1,26 @@
+title: BusyBox SORA Marker Execution — Sora-Derivative Mirai-Fork Active on Host
+id: 625a0af0-2c6e-48b5-89ea-0c7e6b191147
+status: experimental
+description: >-
+  Detects execution of the '/bin/busybox SORA' command, which is the Sora-fork Mirai-derivative lineage signature. Decoded from XOR-0x54 region in all 11 Naku/Pandora-Mirai architectures (UTA-2026-014), replacing stock Mirai's '/bin/busybox MIRAI'. The Mirai bot calls this as part of its process enumeration and competitor-kill routine. Any process executing '/bin/busybox SORA' indicates active Sora-derivative bot execution on the host.
+references:
+    - https://the-hunters-ledger.com/reports/rovodev-mirai-matrix-c2-87.106.143.220/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.command-and-control
+    - attack.t1095
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        CommandLine|contains: '/bin/busybox SORA'
+    condition: selection
+falsepositives:
+    - Unlikely — '/bin/busybox SORA' is not a valid busybox applet call and has no legitimate use
+level: high
+

@@ -1,0 +1,37 @@
+title: Suspected AI-Orchestrated Multi-Stage API Attack Sequence (Machine-Speed Window)
+id: f8fbdc2e-b653-4b9c-b56d-2c004c202ea5
+status: experimental
+description: >-
+  Detects requests to payment/authentication/transaction API endpoints characteristic of
+  the reconnaissance and exploitation stages in a machine-speed, multi-stage API attack
+  sequence tied to LLM-orchestrated attack tooling. Case 8 documented a 6-stage payment
+  API exploitation completed in under 60 seconds. This selection-only rule flags
+  individual requests; operationalizing the full 60-second/4+-endpoint velocity
+  signature requires a SIEM correlation search across API access logs, not expressible
+  as a single Sigma detection rule. Hunting leads only.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.impact
+  - attack.t1657
+  - detection.emerging-threats
+logsource:
+  category: webserver
+  product: linux
+detection:
+  selection:
+    cs-uri-stem|contains:
+      - /api/
+      - /auth/
+      - /payment/
+      - /transaction/
+  condition: selection
+falsepositives:
+  - >-
+    Legitimate payment processing automation, API health check systems, and load
+    balancer probe sequences. A 30-day API call velocity baseline per source IP is
+    recommended before operationalizing.
+level: low
+

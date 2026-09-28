@@ -1,0 +1,40 @@
+title: Cloudflared Access TCP Tunnel Registration to Non-Allowlisted Hostname
+id: 0d88f829-c8e3-42e5-a3c3-34cb8a5fec1a
+status: experimental
+description: >-
+  Detects execution of 'cloudflared access tcp' with the --hostname flag, indicating
+  an operator is activating a Cloudflare tunnel to proxy TCP traffic (RDP, SSH, WinRM)
+  through Cloudflare infrastructure. Observed in Case 1 (Russian Gemini operator)
+  maintaining persistent RDP access via windows_server.tralalarkefe.com and SSH access
+  via gil_dr1.tralalarkefe.com. Legitimate usage requires a formally managed Cloudflare
+  Zero Trust account configuration — ad-hoc usage with operator-bespoke domains
+  indicates tunneled lateral movement or a C2 channel.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.command-and-control
+  - attack.lateral-movement
+  - attack.t1090.004
+  - detection.emerging-threats
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    Image|endswith:
+      - /cloudflared
+      - /cloudflared.exe
+    CommandLine|contains|all:
+      - access
+      - tcp
+      - --hostname
+  condition: selection
+falsepositives:
+  - >-
+    Legitimate Cloudflare Zero Trust TCP application proxies configured by network
+    administrators. Allowlist known Cloudflare Access deployment hostnames — attacker-
+    controlled hostnames will not match corporate Zero Trust domains.
+level: high
+

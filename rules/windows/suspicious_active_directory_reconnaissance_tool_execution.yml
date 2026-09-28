@@ -1,0 +1,40 @@
+title: Suspicious Active Directory Reconnaissance Tool Execution
+id: 9a3c6f12-4d87-4e52-b741-8c5f2a9d0e67
+status: experimental
+description: Detects execution of common Active Directory enumeration tools observed in this AdaptixC2 operator toolkit - SharpHound for BloodHound attack-path mapping, PowerView for PowerSploit AD recon, and ADRecon for comprehensive AD data harvesting. These tools are commodity open-source utilities frequently used by threat actors to identify domain privilege escalation paths, enumerate domain accounts and groups, and map trust relationships prior to lateral movement, but they are equally common in legitimate red-team and penetration-testing engagements.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-45-130-148-125-20260430/
+    - https://github.com/BloodHoundAD/BloodHound
+    - https://github.com/PowerShellMafia/PowerSploit
+author: The Hunters Ledger
+date: 2026-04-30
+tags:
+    - attack.discovery
+    - attack.t1087.002
+    - attack.t1482
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_sharphound:
+        Image|endswith: '\SharpHound.exe'
+        CommandLine|contains:
+            - '-c All'
+            - '--CollectionMethods'
+            - '-CollectionMethod'
+    selection_powerview:
+        CommandLine|contains:
+            - 'Get-NetDomain'
+            - 'Get-NetForest'
+            - 'Invoke-BloodHound'
+            - 'Get-DomainTrust'
+            - 'Get-NetGroupMember'
+    selection_adrecon:
+        Image|endswith: '\ADRecon.exe'
+    condition: selection_sharphound or selection_powerview or selection_adrecon
+falsepositives:
+    - Authorized security assessment or red team exercises - correlate against change management records and authorized testing windows
+    - EDR or vulnerability assessment platforms that incorporate BloodHound data collection natively
+level: medium
+

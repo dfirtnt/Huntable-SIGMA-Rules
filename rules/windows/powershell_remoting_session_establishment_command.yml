@@ -1,0 +1,42 @@
+title: PowerShell Remoting Session Establishment Command
+id: c838460c-7478-41e4-a9de-ee7d44391023
+status: experimental
+description: >-
+    Detects PowerShell command-line content establishing a WS-Management
+    remoting session (New-PSSession, Enter-PSSession or Test-WSMan),
+    observed in this campaign as the primary lateral-movement method used
+    from a compromised web application host against an internal target.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+author: The Hunters Ledger
+date: 2026-08-17
+tags:
+    - attack.lateral-movement
+    - attack.t1021.006
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith: '\powershell.exe'
+    selection_cmd:
+        CommandLine|contains:
+            - 'New-PSSession'
+            - 'Enter-PSSession'
+            - 'Test-WSMan'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate remote administration via PowerShell remoting, common where Ansible, DSC or SCOM manage the WinRM estate
+level: high
+
+File name: proc_creation_win_winrm_session_establishment_webshell.yml
+
+Tier: Detection
+Robustness: 2
+ATT&CK Coverage: T1021.002 (SMB/Windows Admin Shares)
+Confidence: HIGH
+False Positives: IT support scripts that intentionally authenticate to IPC$ with alternate credentials for administrative tasks
+Blind Spots: Misses credential spraying performed directly via SMB (not through net.exe) or via a compiled tool; misses a single successful authentication with no separately-logged failed attempts
+Validation: Run net use \\<host>\IPC$ /user:test test on a test host; a known IT helpdesk tool’s scripted use of alternate credentials against IPC$ should be allow-listed by source host
+Deployment: Windows EDR / Sysmon, all hosts
+

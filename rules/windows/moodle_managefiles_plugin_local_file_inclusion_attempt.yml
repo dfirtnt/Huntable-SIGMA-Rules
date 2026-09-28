@@ -1,0 +1,29 @@
+title: Moodle Managefiles Plugin Local File Inclusion Attempt
+id: 729bf3fc-2d7b-42c3-b1a6-0778082fbeb3
+status: experimental
+description: >-
+    Detects local file inclusion attempts against the Moodle Atto editor managefiles
+    plugin (load.php) using a path-traversal filearea parameter, consistent with the
+    operator's Moodle probing referencing CVE-2020-25630.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/seasia-gov-exploitation-toolkit-144-172-106-236-detections/
+    - https://nvd.nist.gov/vuln/detail/CVE-2020-25630
+author: The Hunters Ledger
+date: 2026-07-17
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection_path:
+        cs-uri-stem|contains: '/lib/editor/atto/plugins/managefiles/load.php'
+    selection_traversal:
+        cs-uri-query|contains:
+            - '../../../config'
+            - 'filearea=..'
+    condition: selection_path and selection_traversal
+falsepositives:
+    - Unlikely, legitimate Atto editor file-manager requests do not include traversal sequences in the filearea parameter
+level: high
+

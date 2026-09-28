@@ -1,0 +1,34 @@
+title: Process Access To LSASS With A Dump-Capable Access Mask
+id: 504bf8d9-074c-497f-ac16-05da396b8637
+status: experimental
+description: >-
+  Detects a process opening a handle to lsass.exe with an access mask consistent with
+  memory dumping (read plus query information), the LSASS credential-access route used
+  alongside mimikatz and SAM/SYSTEM/SECURITY hive theft in this campaign.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.credential-access
+    - attack.t1003.001
+logsource:
+    category: process_access
+    product: windows
+    definition: 'Requires Sysmon Event ID 10 (ProcessAccess) enabled and not filtered for lsass.exe as a target.'
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess:
+            - '0x1010'
+            - '0x1038'
+            - '0x1400'
+            - '0x1410'
+            - '0x1438'
+            - '0x143a'
+            - '0x1fffff'
+    condition: selection
+falsepositives:
+    - Endpoint security or diagnostic tooling deliberately dumping LSASS for legitimate incident-response or troubleshooting purposes
+level: high
+

@@ -1,0 +1,83 @@
+title: Useradd or Usermod Setting a Root-Equivalent or Duplicate UID Outside a Known Package Manager
+id: ea34e2ee-aedb-4ead-a572-2fb6531e41a2
+status: experimental
+description: >-
+    Detects useradd or usermod invoked with a flag that grants a root-
+    equivalent or duplicate UID/GID (-o, -u 0, -g 0, --non-unique, or their
+    long-form equivalents), where the parent process is not a known package
+    manager. This is the direct-invocation counterpart to Content Change to
+    /etc/passwd or /usr/bin/su by a Non-Package Account Tool
+    (9d64a8dc-f752-4455-9329-73ff8738d150): that rule excludes writes to
+    /etc/passwd made by these same account tools so it does not re-alert on
+    routine package-driven provisioning, and by construction cannot see the
+    tools invoked directly by an attacker, because file-write telemetry alone
+    carries no reliable process-ancestry field. This rule uses process-
+    creation telemetry instead, which does carry ParentImage, to restore that
+    direct-invocation coverage.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-13-140-145-210-weblogic-deserialization-telecom-harvester-20260817/
+author: The Hunters Ledger
+date: 2026-09-02
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1136.001
+    - attack.t1098
+    - stp.4
+logsource:
+    category: process_creation
+    product: linux
+    definition: >-
+        Requires process-creation telemetry carrying both CommandLine and a
+        resolved ParentImage, for example Sysmon for Linux Event ID 1 or an
+        EDR agent process-creation event. Plain auditd EXECVE records alone
+        do not carry a resolved ParentImage field without additional PPID
+        correlation.
+detection:
+    selection_tool:
+        Image|endswith:
+            - '/useradd'
+            - '/usermod'
+    selection_privileged_flags:
+        CommandLine|contains:
+            - ' -o '
+            - ' -u 0'
+            - ' -u0'
+            - ' --uid 0'
+            - ' --uid=0'
+            - ' -g 0'
+            - ' -g0'
+            - ' --gid 0'
+            - ' --gid=0'
+            - '--non-unique'
+    filter_parent_pkgmgr:
+        # sourced: documented platform default - the standard Linux package-manager
+        # binaries (dpkg/apt on Debian-family, rpm/yum/dnf on RHEL-family, pacman on
+        # Arch-family) that legitimately invoke useradd/usermod from postinst or hook
+        # scripts during package installation
+        ParentImage|endswith:
+            - '/dpkg'
+            - '/apt'
+            - '/apt-get'
+            - '/rpm'
+            - '/yum'
+            - '/dnf'
+            - '/pacman'
+            - '/systemd-sysusers'
+    condition: selection_tool and selection_privileged_flags and not filter_parent_pkgmgr
+falsepositives:
+    - >-
+        A deliberately provisioned dual-root-equivalent service account on an
+        appliance or legacy application that documents a --non-unique or -u 0
+        requirement. Verify against change records before treating as a true
+        positive.
+    - >-
+        A configuration-management tool (Ansible, Puppet, Chef, cloud-init) that
+        shells out to useradd or usermod directly rather than through a package
+        manager. The parent-image filter above only excludes package-manager
+        parents, not provisioning frameworks, so an environment using one of
+        these should extend filter_parent_pkgmgr with its process name.
+level: high
+
+File name: proc_creation_lnx_useradd_usermod_uid0_privesc.yml
+

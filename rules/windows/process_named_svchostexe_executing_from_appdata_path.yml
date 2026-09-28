@@ -1,0 +1,42 @@
+title: Process Named svchost.exe Executing from AppData Path
+id: 08e75208-eb8e-473d-9827-5a59ef4192db
+status: experimental
+description: >-
+  Detects a process named svchost.exe launching from a user-writable
+  %AppData% subdirectory rather than the legitimate %SystemRoot%\System32
+  location. Observed as the install pattern used by the KAIDO Quasar-fork
+  RAT to masquerade as the Windows service host process, but this naming
+  and path pattern is also used by other unrelated malware families and
+  should be treated as a generic masquerade indicator rather than a
+  KAIDO-specific signal on its own.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/kaido-quasar-rat-detections/
+author: The Hunters Ledger
+date: '2026-07-03'
+tags:
+    - attack.stealth
+    - attack.t1036.005
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.001
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\svchost.exe'
+        Image|contains: '\AppData\'
+    filter_parent_system:
+        ParentImage|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not filter_parent_system
+falsepositives:
+    - >-
+      Rare legitimate portable or sideloaded applications that ship a
+      binary literally named svchost.exe in a user profile path
+      (unusual but not impossible for poorly-vetted freeware)
+    - Other unrelated malware families that reuse the same masquerade pattern
+level: medium
+

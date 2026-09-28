@@ -1,0 +1,37 @@
+title: Gotenberg Metadata-Write Endpoint Anomalous Latency (Possible CVE-2026-42589)
+id: 38daaffe-5d58-4edb-9549-4aec80f168ac
+status: experimental
+description: >-
+    Gotenberg's own structured access log never records the metadata payload on a request
+    that parses as valid JSON, so a sleep-based CVE-2026-42589 RCE attempt is visible in this
+    log only as a latency spike on an endpoint that is otherwise sub-second (measured clean
+    baseline roughly 250 to 650 milliseconds). False-positive risk is high: a genuinely slow
+    ExifTool write (large or malformed document, resource contention) matches identically.
+    Use only where the Detection-tier rule's body visibility is unavailable. Not for alerting.
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-42589
+author: The Hunters Ledger
+date: 2026-09-16
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - stp.3
+logsource:
+    category: application
+    product: gotenberg
+    definition: >-
+        Keys on Gotenberg's own structured HTTP access log fields (uri, method, status,
+        latency). The latency field is assumed to carry Go's time.Duration serialized in
+        nanoseconds, so the 2000000000 threshold is 2 seconds; verify the unit in your own
+        deployment before relying on the threshold.
+detection:
+    selection:
+        uri: '/forms/pdfengines/metadata/write'
+        method: POST
+        status: 200
+        latency|gte: 2000000000
+    condition: selection
+falsepositives:
+    - Genuinely slow ExifTool metadata writes under load or on large or malformed documents
+level: low
+

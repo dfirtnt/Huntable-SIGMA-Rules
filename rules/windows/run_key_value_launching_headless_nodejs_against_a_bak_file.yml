@@ -1,0 +1,32 @@
+title: Run Key Value Launching Headless Node.js Against A .bak File
+id: 981da035-041b-434b-9db6-141c3c778534
+status: experimental
+description: >-
+  Detects a Run key registry value whose data begins conhost --headless and invokes
+  node.exe with a .bak-extension argument, the persistence mechanism used by an
+  EtherRAT-class Node.js bot that resolves its C2 address from an Ethereum smart contract.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.001
+logsource:
+    category: registry_set
+    product: windows
+    definition: 'Requires Sysmon Event ID 13 (RegistryEvent SetValue) with value auditing enabled for HKCU Run keys, or Security Event ID 4657.'
+detection:
+    selection:
+        TargetObject|contains: '\CurrentVersion\Run\'
+        Details|contains|all:
+            - 'conhost --headless'
+            - 'node.exe'
+    filter_extension:
+        Details|contains: '.bak'
+    condition: selection and filter_extension
+falsepositives:
+    - Unknown. No legitimate Node.js packaging pattern matches this launcher-plus-extension combination.
+level: high
+

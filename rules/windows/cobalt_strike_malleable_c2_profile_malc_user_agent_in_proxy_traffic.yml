@@ -1,0 +1,30 @@
+title: Cobalt Strike Malleable C2 Profile MALC User-Agent in Proxy Traffic
+id: 9e3c7a15-6f2b-4d84-a1c9-8b5e2d7f3a61
+status: experimental
+description: >-
+  Detects the Cobalt Strike 3.x Malleable C2 profile User-Agent string ending
+  in the MALC suffix (full string: Mozilla/5.0 (compatible; MSIE 9.0;
+  Windows NT 6.1; WOW64; Trident/5.0; MALC)). This non-standard suffix is a
+  distinctive indicator of a configured Malleable C2 profile and does not
+  appear in any known legitimate browser or application user-agent string.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-172-105-0-126-20260406-detections/
+author: The Hunters Ledger
+date: 2026-04-06
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: proxy
+detection:
+    selection:
+        cs-user-agent|endswith: 'MALC)'
+    condition: selection
+falsepositives:
+    - >-
+      Internal applications or monitoring tools with custom user-agent
+      strings ending in the substring MALC) (verify against known software
+      inventory before tuning out)
+level: high
+

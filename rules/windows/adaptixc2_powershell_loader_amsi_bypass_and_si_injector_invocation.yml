@@ -1,0 +1,30 @@
+title: AdaptixC2 PowerShell Loader - AMSI Bypass and SI Injector Invocation
+id: a3f1c8e2-7b45-4d91-b832-6e0d9f2c1a74
+status: experimental
+description: Detects execution of the AdaptixC2 operator beacon.ps1 PowerShell loader by matching the string-concatenated AMSI bypass marker combined with the operator-specific SI injector class invocation and an embedded base64 MZ PE prefix. The concatenation pattern amsi+Con+text evades static AV string signatures; [SI]::Inject( identifies the operator-custom .NET injector loaded in-memory. Co-occurrence of all three strings in a single script block is highly specific to this loader, but the SI class name is a renameable literal the operator controls in their own source - a rebuild that renames it evades the rule. Requires PowerShell Script Block Logging (Event ID 4104).
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-45-130-148-125-20260430/
+author: The Hunters Ledger
+date: 2026-04-30
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.t1059.001
+    - attack.t1685
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: ps_script
+detection:
+    selection_amsi:
+        ScriptBlockText|contains: "amsi'+'Con'+'text"
+    selection_injector:
+        ScriptBlockText|contains: '[SI]::Inject('
+    selection_base64_mz:
+        ScriptBlockText|contains: 'TVqQAAMA'
+    condition: selection_amsi and selection_injector and selection_base64_mz
+falsepositives:
+    - Custom internal PowerShell tooling that coincidentally uses both an AMSI bypass via string concatenation and a class named SI with an Inject method - considered highly unlikely outside of adversary tooling
+level: medium
+

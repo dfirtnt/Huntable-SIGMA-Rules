@@ -1,0 +1,44 @@
+title: Rhadamanthys EAX-Redirect Process Hollowing Into InstallUtil.exe
+id: b5e2f3d9-4e8c-5a0b-ad3f-3d6f8a9b0c12
+status: experimental
+description: >-
+  Detects suspicious creation of InstallUtil.exe child process from a non-typical parent (loader binary
+  in user-writable location), a precursor to the EAX-redirect process hollowing technique used by this
+  Rhadamanthys customer's loader. EAX-redirect uses W^X memory transitions (RW then RX, never RWX) and
+  rewrites the entry point pointer in EAX rather than the classic SetThreadContext approach. Pair with
+  network telemetry to InstallUtil.exe outbound connections for high-confidence verdict.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-79-137-192-3-20260515-detections/
+author: The Hunters Ledger
+date: 2026-05-15
+tags:
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.t1218.008
+    - attack.t1055.012
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_image:
+        Image|endswith: '\InstallUtil.exe'
+        Image|contains: '\Microsoft.NET\Framework'
+    selection_parent_suspicious:
+        ParentImage|contains:
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\'
+            - '\Users\Public\'
+            - '\ProgramData\'
+    filter_legit_parent:
+        ParentImage|endswith:
+            - '\msiexec.exe'
+            - '\devenv.exe'
+            - '\MSBuild.exe'
+    condition: selection_image and selection_parent_suspicious and not filter_legit_parent
+falsepositives:
+    - >-
+      Legitimate developer or installer workflows that invoke InstallUtil.exe from temp
+      directories.
+level: high
+

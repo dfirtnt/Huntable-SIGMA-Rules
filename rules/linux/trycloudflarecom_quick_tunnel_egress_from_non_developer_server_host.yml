@@ -1,0 +1,30 @@
+title: Trycloudflare.com Quick-Tunnel Egress from Non-Developer Server Host
+id: 5581299d-e9a1-4a83-b85c-8d68a93fd03b
+status: experimental
+description: >-
+  Detects DNS queries or process creation events for trycloudflare.com ephemeral tunnels.
+  Threat actors (Case 1 Russian Gemini operator) use Cloudflare quick-tunnels to proxy
+  C2 traffic through Cloudflare infrastructure, disguising the true C2 IP and bypassing
+  egress firewall rules. Trycloudflare subdomains are ephemeral and randomly generated
+  (e.g. tenant-upcoming-great-descending.trycloudflare.com) — not predictable by defenders.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.command-and-control
+  - attack.t1090.004
+  - detection.emerging-threats
+logsource:
+  category: dns_query
+  product: linux
+detection:
+  selection:
+    query|endswith: .trycloudflare.com
+  condition: selection
+falsepositives:
+  - >-
+    Developers and CI/CD pipelines using Cloudflare Tunnel for local development exposure
+    (ngrok-alternative use case). Exempt known developer/CI hosts by hostname or subnet.
+level: medium
+

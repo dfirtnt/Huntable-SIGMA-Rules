@@ -1,0 +1,31 @@
+title: Svchost.EXE Executed From Non-System Directory
+id: d1fb7553-97d4-45f2-a10b-3f36ed4a242b
+status: experimental
+description: >-
+    Detects svchost.exe executing from a path outside System32 or SysWOW64. The GOCLOUD
+    cryptojacking toolkit renames its XMRig miner to svchost.exe and runs it from a
+    TimeService folder under the user AppData tree, a masquerade legitimate Windows service
+    host processes never perform.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\svchost.exe'
+    filter_main_legit_path:
+        Image|contains:
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
+    condition: selection and not filter_main_legit_path
+falsepositives:
+    - Third-party software that ships a bundled binary named svchost.exe outside the system tree
+level: high
+

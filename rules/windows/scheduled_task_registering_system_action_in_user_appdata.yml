@@ -1,0 +1,38 @@
+title: Scheduled Task Registering SYSTEM Action In User AppData
+id: ec66df96-4699-45b5-9edd-fbf21d195240
+status: experimental
+description: >-
+    Detects schtasks creating a task whose action runs a binary under a user AppData path with
+    SYSTEM privileges. The GOCLOUD miner persists as WindowsTimeSync or WindowsWatchdog pointing
+    at a renamed XMRig under the AppData TimeService folder running as SYSTEM.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1053.005
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_create:
+        CommandLine|contains: '/create'
+    selection_action:
+        CommandLine|contains:
+            - '\AppData\'
+            - '%APPDATA%'
+    selection_system:
+        CommandLine|contains: '/ru SYSTEM'
+    condition: all of selection_*
+falsepositives:
+    - Unusual installers that register SYSTEM tasks pointing at per-user AppData paths
+level: high
+
