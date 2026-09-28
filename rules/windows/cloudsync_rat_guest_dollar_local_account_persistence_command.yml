@@ -1,0 +1,31 @@
+title: CloudSync RAT Guest Dollar Local Account Persistence Command
+id: 301385e1-0331-459e-b547-6229cf0788ff
+status: experimental
+description: >-
+    Detects a "net user" command targeting a local account named "Guest$" without
+    the "/domain" switch. CloudSync's implant re-issues this command on a short cycle
+    to keep a local machine-account-masquerade backdoor present; the trailing dollar
+    sign mimics a computer-account naming convention that most admins never use for a
+    local user.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.t1136.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'net user'
+            - 'Guest$'
+    filter_domain:
+        CommandLine|contains: '/domain'
+    condition: selection and not filter_domain
+falsepositives:
+    - Unlikely, local accounts ending in a literal dollar sign are not a standard Windows naming convention
+level: high
+

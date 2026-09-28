@@ -1,0 +1,38 @@
+title: Certutil Download Cradle Fetching Remote Payload
+id: 28a3b008-b1d3-4eab-bb33-d31c35e62973
+status: experimental
+description: >-
+    Detects certutil.exe used as a download cradle with the urlcache and split flags to fetch
+    a remote file over HTTP. The GOCLOUD Windows worm uses this to pull deploy.bat to the temp
+    directory during WMI-based LAN propagation.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.command-and-control
+    - attack.stealth
+    - attack.t1105
+    - attack.t1140
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certutil.exe'
+        - OriginalFileName: 'CertUtil.exe'
+    selection_urlcache:
+        CommandLine|contains:
+            - '-urlcache'
+            - '/urlcache'
+    selection_split:
+        CommandLine|contains:
+            - '-split'
+            - '/split'
+    selection_http:
+        CommandLine|contains: 'http'
+    condition: selection_img and selection_urlcache and selection_split and selection_http
+falsepositives:
+    - Rare administrative use of certutil to retrieve certificate revocation data
+level: high
+

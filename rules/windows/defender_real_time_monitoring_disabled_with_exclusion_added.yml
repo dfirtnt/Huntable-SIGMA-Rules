@@ -1,0 +1,28 @@
+title: Defender Real-Time Monitoring Disabled With Exclusion Added
+id: 11c51f72-48bd-43d5-9a5d-2d0da40f5ccf
+status: experimental
+description: >-
+    Detects a PowerShell script block that both disables Windows Defender real-time monitoring
+    and adds a scan exclusion path. The GOCLOUD Windows miner performs both actions before any
+    payload download so the miner it drops is never scanned.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: ps_script
+    product: windows
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_disable:
+        ScriptBlockText|contains: 'Set-MpPreference -DisableRealtimeMonitoring'
+    selection_exclude:
+        ScriptBlockText|contains: 'Add-MpPreference -ExclusionPath'
+    condition: all of selection_*
+falsepositives:
+    - Endpoint-management scripts that intentionally reconfigure Defender
+level: high
+

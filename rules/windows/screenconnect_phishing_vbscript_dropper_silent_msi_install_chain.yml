@@ -1,0 +1,36 @@
+title: ScreenConnect Phishing VBScript Dropper Silent MSI Install Chain
+id: c48377bd-0066-4bb0-8cc7-4041cd0a0e54
+status: experimental
+description: >-
+    Detects the ScreenConnect phishing dropper chain where a VBScript (Attachment.vbs) spawns
+    msiexec.exe with silent install flags (/quiet ALLUSERS=2) to install ConnectWise ScreenConnect
+    without user interaction. The dropper downloads the MSI from the operator distribution domain
+    using MSXML2.ServerXMLHTTP.6.0 with SSL verification deliberately bypassed. wscript.exe
+    spawning msiexec.exe with ALLUSERS=2 is characteristic of this phishing dropper and is not
+    expected behavior in legitimate software deployment from this parent process.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-74-0-42-25-20260316-detections/
+author: The Hunters Ledger
+date: 2026-03-17
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1059.005
+    - attack.t1218.007
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\wscript.exe'
+    selection_child:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains|all:
+            - '/quiet'
+            - 'ALLUSERS=2'
+    condition: selection_parent and selection_child
+falsepositives:
+    - Legitimate software deployment scripts that invoke msiexec silently from wscript.exe; validate MSI download source URL and installation target domain against known-good deployment infrastructure
+level: high
+

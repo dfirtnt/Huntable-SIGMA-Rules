@@ -1,0 +1,41 @@
+title: RDP, UAC Or Token-Filter Registry Value Weakened
+id: b3cdcf57-b8dc-4f30-8420-1cbd8d0548f7
+status: experimental
+description: >-
+  Detects one of the registry value changes used to enable RDP without Network Level
+  Authentication or to weaken UAC and remote local-account token filtering. Two or more of
+  these on the same host in a short window is the actual campaign signature and needs
+  analyst correlation this single-event rule cannot perform.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.persistence
+    - attack.t1112
+    - attack.privilege-escalation
+    - attack.t1548.002
+logsource:
+    category: registry_set
+    product: windows
+    definition: 'Requires Sysmon Event ID 13 (RegistryEvent SetValue) or Security Event ID 4657 with value auditing enabled for the listed keys.'
+detection:
+    sel_rdp_enable:
+        TargetObject|endswith: '\Terminal Server\fDenyTSConnections'
+        Details: 'DWORD (0x00000000)'
+    sel_nla_disable:
+        TargetObject|endswith: '\WinStations\RDP-Tcp\UserAuthentication'
+        Details: 'DWORD (0x00000000)'
+    sel_tokenfilter:
+        TargetObject|endswith: '\Policies\System\LocalAccountTokenFilterPolicy'
+        Details: 'DWORD (0x00000001)'
+    sel_uac_disable:
+        TargetObject|endswith: '\Policies\System\EnableLUA'
+        Details: 'DWORD (0x00000000)'
+    condition: 1 of sel_*
+falsepositives:
+    - Deliberate server provisioning or hardening review touching one or more of these values
+level: medium
+

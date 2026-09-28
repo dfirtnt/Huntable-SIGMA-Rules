@@ -1,0 +1,43 @@
+title: PowerShell Instana API Call with Stored JWT Token from Unauthorized Host
+id: ba31534e-e868-47fc-bfcd-4c5a4ce0b85d
+status: experimental
+description: >-
+  Detects PowerShell processes invoking the Instana API endpoint for a specific OCP-hosted
+  tenant with a stored JWT bearer token and certificate validation disabled (-SkipCertificateCheck).
+  This pattern matches the Turkish ARPA operator's victim-side collector (instana_local_collector.ps1)
+  targeting the the victim organization Instana tenant. Any host not designated as an Instana operations
+  system triggering this pattern should be treated as a true positive for credential-based
+  observability data exfiltration.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/turkish-arpa-openclaw-state-insurer-209.38.205.158-detections/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.credential-access
+    - attack.t1552.001
+    - attack.command-and-control
+    - attack.t1071.001
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_ps:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    selection_instana:
+        CommandLine|contains:
+            - 'ocpinstana'
+            - 'api/ingest/instana'
+    selection_flags:
+        CommandLine|contains:
+            - '-SkipCertificateCheck'
+    condition: selection_ps and selection_instana and selection_flags
+falsepositives:
+    - Legitimate Instana operations team scripts that use -SkipCertificateCheck for OCP self-signed certificates
+    - Authorized PowerShell monitoring automation targeting the same tenant endpoint
+level: high
+

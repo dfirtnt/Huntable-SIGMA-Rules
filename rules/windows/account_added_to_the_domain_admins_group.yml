@@ -1,0 +1,29 @@
+title: Account Added To The Domain Admins Group
+id: 726b71d6-5aa6-4ab0-9f28-83eca3cdc5be
+status: experimental
+description: >-
+  Detects a security-enabled global group membership change adding an account to Domain
+  Admins, the persistence step this campaign's account-creation scripts perform
+  immediately after creating a backdoor domain account.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+    - attack.t1136.002
+logsource:
+    product: windows
+    service: security
+    definition: 'Requires Windows Security auditing on the Account Management subcategory, "Audit Security Group Management" enabled, on a domain controller.'
+detection:
+    selection:
+        EventID: 4728
+        TargetUserName: 'Domain Admins'
+    condition: selection
+falsepositives:
+    - Change-controlled administrative promotion of a new Domain Admin by IT staff
+level: high
+

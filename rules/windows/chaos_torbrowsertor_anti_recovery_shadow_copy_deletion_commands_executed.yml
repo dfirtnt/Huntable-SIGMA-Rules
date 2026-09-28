@@ -1,0 +1,42 @@
+title: Chaos TorBrowserTor Anti-Recovery / Shadow Copy Deletion Commands Executed
+name: chaos_antirecovery_commands
+id: 3b7e9f4a-c2d8-4b5e-e7a1-6c4f9b2e8d37
+status: experimental
+description: >-
+  Detects execution of shadow-copy or backup-catalog deletion commands
+  (vssadmin delete shadows, wmic shadowcopy delete, wbadmin delete
+  catalog, bcdedit recoveryenabled no) associated with Stage-5a
+  Chaos/TorBrowserTor ransomware anti-recovery behavior. Tier: Hunting
+  standalone (see the Hunting Rules subsection below for the full
+  Rationale/False Positives writeup) — a generic command pattern shared
+  with legitimate backup tooling and most other ransomware families.
+  Co-located in this YAML block, rather than presented only in the
+  Hunting section, because the correlation rule that follows must
+  resolve this rule by name within the same Sigma document.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.impact
+    - attack.t1490
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_antirecovery:
+        CommandLine|contains:
+            - 'vssadmin delete shadows'
+            - 'wmic shadowcopy delete'
+            - 'wbadmin delete catalog'
+            - 'bcdedit /set'
+            - 'recoveryenabled no'
+    condition: selection_antirecovery
+falsepositives:
+    - >-
+      Legitimate backup software cleanup operations (vssadmin, wbadmin)
+      — correlate with concurrent .torbrowsertor file creation events for
+      confirmation
+    - System administrators running manual shadow copy management
+level: medium

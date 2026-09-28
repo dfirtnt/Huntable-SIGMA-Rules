@@ -1,0 +1,51 @@
+title: HijackLoader GrimResource MMC Spawning PowerShell Adding Defender Exclusion
+id: e73a1b48-c926-4e85-9fd2-6b8d3e4a7c19
+status: experimental
+description: >-
+  Detects the HijackLoader GrimResource MSC file execution chain where mmc.exe
+  spawns cmd.exe or powershell.exe that subsequently invokes Add-MpPreference
+  with -ExclusionExtension or -ExclusionPath to disable Windows Defender
+  real-time protection for the operator's persistence directory. In the
+  observed campaign, the MSC files execute XSL -> VBScript -> PowerShell to
+  add C:\ProgramData\adv_ctrl to Defender exclusions before dropping the
+  loader chain. This mmc.exe -> PowerShell -> Add-MpPreference combination is
+  not a legitimate administrative pattern.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.stealth
+    - attack.execution
+    - attack.defense-impairment
+    - attack.t1218.014
+    - attack.t1059.001
+    - attack.t1685
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\mmc.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+    selection_cmdline:
+        CommandLine|contains:
+            - 'Add-MpPreference'
+            - 'ExclusionExtension'
+            - 'ExclusionPath'
+            - 'Set-MpPreference'
+    condition: selection_parent and selection_cmdline
+falsepositives:
+    - >-
+      Security administrators who open MMC snap-ins and then separately run
+      PowerShell to manage Defender exclusions in the same session (extremely
+      unlikely as a process-parent relationship: MMC does not propagate as
+      the parent for manually opened PowerShell windows)
+    - Automated endpoint management solutions that use MMC-based snap-ins to
+      deliver Defender configuration changes (verify via change-management records)
+level: high
+

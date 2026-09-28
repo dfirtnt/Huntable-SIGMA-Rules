@@ -1,0 +1,43 @@
+title: Legacy .job Scheduled Task File Created in Windows Tasks Directory
+id: 9e6b3f17-d452-4a08-c91d-8b7e2f5a3c06
+status: experimental
+description: >-
+  Detects creation of any legacy .job-format scheduled task file under
+  C:\Windows\Tasks\, a known blind spot in autorunsc (Sysinternals Autoruns)
+  enumeration that does not parse this path by default. Modern Windows
+  writes XML-format scheduled tasks to C:\Windows\System32\Tasks\ instead,
+  so a write to the legacy path is uncommon outside of older third-party
+  installers or enterprise deployment tooling. Observed in the
+  HijackLoader/Penguish/Rugmi campaign as the watchermgmt.job persistence
+  artifact, auto-migrated to an XML-format task by the Windows Schedule
+  service within 90ms of the legacy write; broadened here to cover any
+  legacy .job write regardless of task name or dropping process.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1053.005
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|startswith: 'C:\Windows\Tasks\'
+        TargetFilename|endswith: '.job'
+    condition: selection
+falsepositives:
+    - >-
+      Legacy scheduled tasks created by third-party software installers
+      writing .job files to C:\Windows\Tasks\ (uncommon in modern
+      environments — legacy .job format is rarely used by legitimate
+      software after Windows Vista)
+    - >-
+      Enterprise management tools (SCCM, Ansible, PDQ) that use legacy
+      .job format for scheduled task deployment (verify parent process chain)
+level: medium
+

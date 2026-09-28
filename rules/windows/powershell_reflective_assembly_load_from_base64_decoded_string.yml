@@ -1,0 +1,30 @@
+title: PowerShell Reflective Assembly Load From Base64-Decoded String
+id: 5024b26b-169d-4ef8-8016-ca502a557d1b
+status: experimental
+description: >-
+  Detects a PowerShell script block combining Reflection.Assembly Load with a
+  Base64-decoded byte array, a common reflective in-memory execution pattern this
+  campaign uses for shellcode injection staging. Broadly used by legitimate tooling as
+  well, so this is a scoping signal rather than a high-confidence alert.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.stealth
+    - attack.t1620
+    - attack.t1027
+logsource:
+    category: ps_script
+    product: windows
+    definition: 'Requires PowerShell Script Block Logging (Event ID 4104) enabled.'
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - '[System.Reflection.Assembly]::Load('
+            - 'FromBase64String'
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell modules and administrative tooling that reflectively load .NET assemblies from an embedded Base64 payload
+level: low
+

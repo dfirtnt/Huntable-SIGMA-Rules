@@ -1,0 +1,36 @@
+title: Operator-Supplied SSH Key File Created in User SSH Directory
+id: f9b8ab33-5436-4f3a-a996-f737e54a3d37
+status: experimental
+description: >-
+  Detects creation of the Turkish ARPA operator-supplied SSH key files (rca_key.pem for
+  OpenSSH, rca_key.ppk for PuTTY) in any Windows user's .ssh directory. The operator
+  distributed these specific key files to the victim-side insider (the victim organization Windows
+  AD user [employee ID — suppressed]) as part of the tunnel-deployment toolkit documented in the operator's
+  Turkish-language insider-recruitment handoff documents. Presence of these filenames in
+  any user's .ssh directory indicates insider toolkit deployment regardless of the containing
+  user account.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/turkish-arpa-openclaw-state-insurer-209.38.205.158-detections/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.004
+    - attack.command-and-control
+    - attack.t1572
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\.ssh\'
+        TargetFilename|endswith:
+            - '\rca_key.pem'
+            - '\rca_key.ppk'
+    condition: selection
+falsepositives:
+    - Legitimate administrators who happen to name their SSH keys rca_key (verify key fingerprint and origin against CA records)
+level: high
+

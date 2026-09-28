@@ -1,0 +1,49 @@
+title: Active Directory Tier-0 Backdoor Account Creation Or Privileged Group Addition
+id: b66c823b-08d3-4e03-8259-78257e98439c
+status: experimental
+description: >-
+    Detects either the creation of a user account (not a computer account) whose
+    sAMAccountName ends in a literal dollar sign, or the addition of any account to
+    a Tier-0 privileged group (local Administrators, or the well-known Domain
+    Admins/Enterprise Admins/Schema Admins relative IDs, matched by SID suffix so
+    the rule is independent of OS locale and does not require the victim's domain
+    name). Windows logs true computer-account creation under a separate event ID,
+    so a dollar-suffixed name arriving via the user-account-creation event is itself
+    the discriminator for a machine-account masquerade. Observed as an orchestrator
+    tool's one-shot creation of a hidden "Guest$" account escalated into all four
+    groups to build a forest-level backdoor.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1136.002
+    - attack.t1098.007
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_create:
+        EventID: 4720
+        SamAccountName|contains: '$'
+    selection_privgroup_domain:
+        EventID:
+            - 4728
+            - 4756
+        TargetSid|endswith:
+            - '-512'
+            - '-518'
+            - '-519'
+    selection_privgroup_local:
+        EventID: 4732
+        TargetSid: 'S-1-5-32-544'
+    filter_main_homegroup:
+        EventID: 4720
+        TargetUserName: 'HomeGroupUser$'
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate onboarding of a new privileged administrator, or a genuine computer/service account naming collision with the dollar-sign check
+level: high
+

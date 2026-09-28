@@ -1,0 +1,29 @@
+title: CloudSync RAT Windows Update Service Masquerade Installation
+id: 0ae91cbf-e335-4060-9283-8862790a7c0e
+status: experimental
+description: >-
+    Detects installation of a Windows service whose display name is "Windows Update
+    Service". The genuine Windows Update service display name is "Windows Update"
+    (short form), the extra word is CloudSync's masquerade convention for its
+    svhost4 implant's persistence service, and does not occur in stock Windows.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7045
+        ServiceName: 'Windows Update Service'
+    condition: selection
+falsepositives:
+    - Unlikely, the genuine Windows Update service display name is "Windows Update", not "Windows Update Service"
+level: high
+

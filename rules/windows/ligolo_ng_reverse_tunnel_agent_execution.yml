@@ -1,0 +1,33 @@
+title: Ligolo-ng Reverse Tunnel Agent Execution
+id: 3f7a2b58-9e04-4c83-a625-1d6b8f4e2a91
+status: experimental
+description: Detects execution of the Ligolo-ng reverse-tunneling agent by process image name or by command-line connect argument combined with the default port. Ligolo-ng is an open-source TLS-over-TCP reverse proxy tool used by threat actors to create tunnels from a compromised host into internal networks, enabling lateral movement without direct routing. The operator in this campaign deployed the stock upstream v0.8.3 release at commit 913fe64e088d5db2185d392965bf4cd3dd1d9495; the exact file hash for that build is tracked in the campaign IOC feed rather than in this rule's selection logic.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-45-130-148-125-20260430/
+    - https://github.com/nicocha30/ligolo-ng
+author: The Hunters Ledger
+date: 2026-04-30
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_name:
+        Image|endswith:
+            - '\ligolo.exe'
+            - '\ligolo-ng.exe'
+    selection_cmdline:
+        CommandLine|contains:
+            - '--connect'
+            - '-connect'
+    selection_port:
+        CommandLine|contains: ':11601'
+    condition: selection_name or (selection_cmdline and selection_port)
+falsepositives:
+    - Authorized security assessment or network administration use of Ligolo-ng - correlate against authorized change records and known red team activity windows
+    - Security research and lab environments where Ligolo-ng is used for legitimate network tunneling evaluation
+level: high
+

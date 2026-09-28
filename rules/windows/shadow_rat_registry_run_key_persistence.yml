@@ -1,0 +1,33 @@
+title: Shadow RAT Registry Run Key Persistence
+id: ff8d332d-4f1f-44d7-89ac-5d4373f4a341
+status: experimental
+description: |
+    Detects Shadow RAT v2.6.4.0 creating a registry Run key for persistence with the
+    characteristic value name "Shadow Client Startup". This value points to the malware
+    install path at %APPDATA%\SubDir\Client.exe or %APPDATA%\SubDir\$77Client.exe depending
+    on the build variant (staging vs production). Presence of this key indicates an active
+    Shadow RAT infection with established persistence.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.001
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_key:
+        TargetObject|endswith: '\CurrentVersion\Run\Shadow Client Startup'
+    selection_data:
+        Details|contains:
+            - '\SubDir\Client.exe'
+            - '\SubDir\$77Client.exe'
+    condition: selection_key or selection_data
+falsepositives:
+    - No known legitimate software uses the registry value name "Shadow Client Startup"
+level: medium
+

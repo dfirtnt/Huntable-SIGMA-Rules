@@ -1,0 +1,33 @@
+title: Curl Download Of Node.js Runtime Followed By Tar Extraction Into LOCALAPPDATA
+id: 32c19bc3-e8a6-430c-bb8b-b75943b93488
+status: experimental
+description: >-
+  Detects curl.exe fetching a Node.js distribution archive from nodejs.org followed by
+  tar.exe extracting it into %LOCALAPPDATA%, the bring-your-own-runtime bootstrap this
+  campaign's Node.js bot uses to obtain a signed, legitimate node.exe on a host with no
+  development toolchain.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging that populates CommandLine, for example Sysmon EID 1 or Security EID 4688 with command line auditing enabled.'
+detection:
+    selection_curl:
+        Image|endswith: '\curl.exe'
+        CommandLine|contains|all:
+            - 'nodejs.org/dist'
+            - '.zip'
+    selection_tar:
+        Image|endswith: '\tar.exe'
+        CommandLine|contains: '\AppData\Local\'
+    condition: selection_curl or selection_tar
+falsepositives:
+    - A developer workstation or build server legitimately provisioning Node.js this same way
+level: low
+

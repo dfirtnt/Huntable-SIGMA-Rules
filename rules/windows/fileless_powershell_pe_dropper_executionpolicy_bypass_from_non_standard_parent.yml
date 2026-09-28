@@ -1,0 +1,50 @@
+title: Fileless PowerShell PE Dropper ExecutionPolicy Bypass from Non-Standard Parent
+id: 945438df-0fc1-4861-9ed6-4c66ae11e700
+status: experimental
+description: >-
+    Detects execution of PowerShell with -ExecutionPolicy Bypass loading a .ps1 file from
+    non-standard parent processes, consistent with the puf.ps1 and sync.ps1 fileless PE dropper
+    chain used in this campaign. These droppers hex-decode an embedded 310KB .NET PE assembly and
+    load it entirely in memory via Assembly.Load with no disk write, bypassing file-based detection.
+    The rule targets PowerShell spawned by remote access tools, command shells, or scripting
+    interpreters not expected to launch PowerShell with policy bypass flags in normal operations.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-74-0-42-25-20260316-detections/
+author: The Hunters Ledger
+date: 2026-03-17
+tags:
+    - attack.execution
+    - attack.stealth
+    - attack.t1059.001
+    - attack.t1027.011
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains|all:
+            - '-ExecutionPolicy'
+            - 'Bypass'
+            - '.ps1'
+    selection_staging_path:
+        CommandLine|contains:
+            - '\AppData\'
+            - '\Temp\'
+            - '\ProgramData\'
+            - '\Users\Public\'
+            - '\Downloads\'
+            - '\$Recycle.Bin\'
+    filter_standard_parents:
+        ParentImage|endswith:
+            - '\explorer.exe'
+            - '\services.exe'
+            - '\svchost.exe'
+            - '\msiexec.exe'
+    condition: selection and selection_staging_path and not filter_standard_parents
+falsepositives:
+    - Software installers and updaters that stage a setup script under %TEMP% or %APPDATA% and invoke it with a policy bypass from a parent not on the standard-parent list
+    - Legitimate administrative scripts invoked via remote management tools, scheduled tasks, or software deployment systems; extend filter_standard_parents to include known-good deployment parent images in the target environment
+level: medium
+

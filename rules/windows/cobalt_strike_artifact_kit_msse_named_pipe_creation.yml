@@ -1,0 +1,35 @@
+title: Cobalt Strike Artifact Kit MSSE Named Pipe Creation
+id: b7c91d3e-5a20-4f88-b2d4-8e1c9a4f6b52
+status: experimental
+description: >-
+  Detects creation of the Cobalt Strike Artifact Kit default named pipe
+  pattern MSSE-[number]-server. The Artifact Kit service variant
+  (artifact32svc/artifact64svc) creates this pipe to transfer XOR-encoded
+  shellcode to the hollowing target via kernel pipe indirection as an AV
+  evasion technique. The pipe ID is derived from GetTickCount() modulo
+  9898, producing values in the range 0 to 9897. No legitimate Windows
+  component creates pipes with this naming pattern.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.privilege-escalation
+    - attack.t1055.003
+    - attack.stealth
+    - detection.emerging-threats
+logsource:
+    category: pipe_created
+    product: windows
+detection:
+    selection:
+        PipeName|startswith: '\MSSE-'
+        PipeName|endswith: '-server'
+    condition: selection
+falsepositives:
+    - >-
+      Unlikely — MSSE-[0-9]+-server pipe naming is specific to the Cobalt
+      Strike Artifact Kit default configuration; no legitimate Windows
+      component uses this pattern
+level: high
+

@@ -1,0 +1,34 @@
+title: Chisel Reverse Tunnel Client or Server Execution
+id: fa8f3555-62f9-42b7-8820-0806b3c73872
+status: experimental
+description: >-
+    Detects execution of the Chisel TCP/UDP tunneling tool in server or client mode.
+    Chisel is a dual-use, publicly available tool with legitimate uses by administrators
+    and security testers, so this is a broad hunting signal for tunnel-tool usage rather
+    than a standalone alert. The Chisel binary hash itself is a shared commodity build
+    used by hundreds of unrelated parties and is not a reliable attribution or blocking
+    anchor: this rule detects the behavior of running the tool, not a specific file.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/seasia-gov-exploitation-toolkit-144-172-106-236-detections/
+    - https://github.com/jpillora/chisel
+author: The Hunters Ledger
+date: 2026-07-17
+tags:
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_name:
+        Image|contains: 'chisel'
+    selection_mode:
+        CommandLine|contains:
+            - ' server '
+            - ' client '
+    condition: selection_name and selection_mode
+falsepositives:
+    - Authorized red-team or security-testing use of Chisel
+    - Legitimate administrator use of Chisel for NAT traversal or firewall bypass
+level: medium
+

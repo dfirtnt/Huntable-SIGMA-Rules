@@ -1,0 +1,39 @@
+title: Artifact Kit EAX-Redirect Process Hollowing via Rundll32 No Arguments
+id: a4f82c19-7b3e-4d56-9e1a-2c5f8b0d3e74
+status: experimental
+description: >-
+  Detects the Cobalt Strike Artifact Kit service variant EAX-redirect
+  process hollowing pattern where a Windows service process (services.exe
+  parent) spawns rundll32.exe with no command-line arguments. The Artifact
+  Kit then performs VirtualAllocEx, WriteProcessMemory, and
+  SetThreadContext on the suspended rundll32.exe to redirect execution to
+  shellcode via the EAX register. This technique bypasses
+  NtUnmapViewOfSection-anchored classic process hollowing detection
+  because the original PE is never unmapped.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.privilege-escalation
+    - attack.t1055.003
+    - attack.stealth
+    - attack.t1218.011
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\services.exe'
+        Image|endswith: '\rundll32.exe'
+    filter_has_args:
+        CommandLine|contains: ' '
+    condition: selection and not filter_has_args
+falsepositives:
+    - >-
+      Legitimate Windows services that invoke rundll32.exe without
+      arguments (extremely rare; verify by examining the parent service
+      binary path and cross-referencing against asset inventory)
+level: high
+

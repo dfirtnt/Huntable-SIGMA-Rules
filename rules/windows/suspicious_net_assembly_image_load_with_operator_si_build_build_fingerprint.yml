@@ -1,0 +1,27 @@
+title: Suspicious .NET Assembly Image Load with Operator si_build Build Fingerprint
+id: 5b8e2d47-1c93-4a76-f018-9b4d7e3c6f85
+status: experimental
+description: Detects PowerShell loading a .NET DLL image whose PE version metadata contains the operator build-placeholder string si_build. This string appears in CompanyName, FileDescription, InternalName, and OriginalFilename fields of the operator-written injector.dll found in this AdaptixC2 deployment. The string is a Linux-build artifact from /tmp/si_build/ left unredacted in the PE version resource and is not present in any known legitimate software, but it is a renameable literal the operator controls - a future build that changes the project name evades this rule.
+references:
+    - https://the-hunters-ledger.com/reports/opendirectory-45-130-148-125-20260430/
+author: The Hunters Ledger
+date: 2026-04-30
+tags:
+    - attack.stealth
+    - attack.privilege-escalation
+    - attack.t1055
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Image|endswith: '\powershell.exe'
+        Description|contains: 'si_build'
+    filter_legitimate:
+        Signed: 'true'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Internal developer tooling where a developer has named a build artifact si_build and loaded it via PowerShell - cross-reference against software asset inventory
+level: medium
+

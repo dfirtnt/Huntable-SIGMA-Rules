@@ -1,0 +1,42 @@
+title: Zone.Identifier Alternate Data Stream Removal for SmartScreen Bypass
+id: b78a5718-03c3-4e99-ab50-7fd048a70872
+status: experimental
+description: |
+    Detects deletion of the Zone.Identifier alternate data stream (ADS) from executable files
+    by non-browser, non-system processes. Both Shadow RAT and XWorm remove the Mark-of-the-Web
+    (MOTW) from their own executables after installation to suppress Windows SmartScreen warnings
+    on subsequent executions. Shadow RAT uses FileHelper.DeleteZoneIdentifier; XWorm performs a
+    direct ADS stream deletion. Anchored on the file-delete event rather than file creation —
+    file creation would match every downloaded file system-wide, since the ADS is created
+    automatically on every download, and would be pure baseline noise.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.defense-impairment
+    - attack.t1553.005
+    - detection.emerging-threats
+logsource:
+    category: file_delete
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith: ':Zone.Identifier'
+    filter_browser:
+        Image|endswith:
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+            - '\iexplore.exe'
+    filter_system:
+        Image|startswith:
+            - 'C:\Windows\'
+            - 'C:\Program Files\'
+    condition: selection and not (filter_browser or filter_system)
+falsepositives:
+    - Download managers or file transfer utilities that strip Zone.Identifier after checksum verification
+    - Software deployment and packaging tools that remove MOTW from downloaded installers during staging
+    - Self-updating legitimate software that clears its own Zone.Identifier stream after a user-consented first run
+level: medium
+

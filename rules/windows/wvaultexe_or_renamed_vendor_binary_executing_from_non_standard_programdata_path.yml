@@ -1,0 +1,38 @@
+title: WVault.exe or Renamed Vendor Binary Executing from Non-Standard ProgramData Path
+id: 6684f300-fac8-4477-9d8a-c33b1c724155
+status: experimental
+description: >-
+  Detects a process named WVault.exe executing from C:\ProgramData\, the
+  non-standard drop path used by the HijackLoader/Penguish/Rugmi campaign
+  for a renamed, genuine signed Qihoo 360 PromoUtil.exe used as a hollow
+  host for injected .NET RAT payloads. WVault.exe is not a filename used
+  by any known legitimate software; this cross-campaign TTP cluster
+  (renaming a signed vendor binary as an injection host) has been observed
+  across 8+ unrelated campaigns since 2025, so a hit should be correlated
+  with family-specific indicators before attribution.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.stealth
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\WVault.exe'
+        Image|contains: '\ProgramData\'
+    condition: selection
+falsepositives:
+    - >-
+      Rare legitimate portable or sideloaded applications that ship a
+      binary literally named WVault.exe in a user-writable path (no known
+      legitimate software uses this exact name)
+    - >-
+      Other unrelated malware families that reuse the identical
+      rename-a-signed-vendor-binary masquerade pattern
+level: medium
+

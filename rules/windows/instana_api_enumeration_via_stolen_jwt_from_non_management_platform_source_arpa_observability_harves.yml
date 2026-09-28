@@ -1,0 +1,39 @@
+title: >-
+  Instana API Enumeration via Stolen JWT from Non-Management-Platform Source
+  (ARPA Observability Harvester)
+id: f9c5ebeb-d6b8-4425-bb85-bfa4d30e28ac
+status: experimental
+description: >-
+  Detects PowerShell execution of Instana API enumeration scripts using the -SkipCertificateCheck
+  flag alongside references to the ocpinstana endpoint pattern, characteristic of the
+  Turkish ARPA operator's instana_local_collector.ps1 script. The script makes sliding
+  10-minute-window GET /api/events requests with a stolen 10-year Instana JWT to
+  exfiltrate observability telemetry to the attacker's ARPA platform. Detection from
+  PowerShell Script Block Logging is highly reliable when -SkipCertificateCheck appears
+  alongside Instana endpoint strings.
+references:
+  - https://the-hunters-ledger.com/reports/ai-agent-frameworks-2026-05-23/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+  - attack.collection
+  - attack.exfiltration
+  - attack.t1119
+  - detection.emerging-threats
+logsource:
+  product: windows
+  category: ps_script
+  definition: Script Block Logging must be enabled (reg key HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockLogging=1)
+detection:
+  selection:
+    ScriptBlockText|contains|all:
+      - SkipCertificateCheck
+      - ocpinstana
+  condition: selection
+falsepositives:
+  - >-
+    Legitimate Instana API clients that use -SkipCertificateCheck for internal OCP
+    self-signed certificates. Narrow by source host — the attacker's exfiltration
+    target is not a legitimate Instana destination.
+level: high
+

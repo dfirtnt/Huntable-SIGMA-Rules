@@ -1,0 +1,34 @@
+title: Scheduled PowerShell Re-Pull Of Remote Script Via IEX WebClient DownloadString
+id: 2875053e-f1d1-429d-bf6a-49ee74d7c6dd
+status: experimental
+description: >-
+  Detects a PowerShell process launched with a command line that downloads and immediately
+  executes a remote script via IEX and Net.WebClient.DownloadString, the pattern used by a
+  weekly SYSTEM scheduled task to re-pull the full attack chain fresh from C2 rather than
+  running a static payload.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging that populates CommandLine, for example Sysmon EID 1 or Security EID 4688 with command line auditing enabled.'
+detection:
+    selection_image:
+        Image|endswith: '\powershell.exe'
+    selection_cmd:
+        CommandLine|contains|all:
+            - 'IEX'
+            - 'DownloadString'
+    condition: selection_image and selection_cmd
+falsepositives:
+    - Internal automation tooling that intentionally downloads and executes a remote update script on a schedule
+level: high
+

@@ -1,0 +1,28 @@
+title: Run Key SystemUpdate Value Pointing To Startup Folder Tilde Executable
+id: 3598bf78-f702-4ab3-b8ba-9d38f62eab80
+status: experimental
+description: >-
+    Detects an HKCU Run value named "SystemUpdate" whose data points at a
+    tilde-prefixed executable inside the user's Startup folder. This is the
+    deployment stub's persistence step, added immediately after it copies its
+    downloaded payload into Startup under a randomized ~<digits>.exe name.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\CurrentVersion\Run\SystemUpdate'
+        Details|contains: '\Startup\~'
+    condition: selection
+falsepositives:
+    - Unlikely, the combination of the SystemUpdate value name and a Startup-folder tilde-prefixed target is not a known legitimate pattern
+level: high
+

@@ -1,0 +1,37 @@
+title: Outbound HTTPS to the Victim Organization OCP Instana Tenant
+id: 024cd785-789d-4a99-8098-439f87c1df17
+status: experimental
+description: >-
+  Detects outbound HTTPS connections to the the victim organization OCP-hosted Instana tenant
+  wildcard domain (*.ocpinstana.[victim-domain].com.tr). The Turkish ARPA operator harvested
+  victim observability data from this endpoint using a stolen 10-year-lifetime JWT. This
+  selection has no host-based filter — it fires identically for designated Instana operations
+  hosts and for unauthorized hosts — so hits must be triaged against the operations team
+  allow-list before escalation. Scoped to the victim organization's own environment; the
+  underlying hostname is excluded from the public IOC feed per the campaign's disclosure policy.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/turkish-arpa-openclaw-state-insurer-209.38.205.158-detections/
+author: The Hunters Ledger
+date: '2026-05-26'
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.stealth
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.initial-access
+    - attack.t1078
+    - detection.emerging-threats
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationHostname|endswith: '.ocpinstana.[victim-domain].com.tr'
+        DestinationPort: 443
+    condition: selection
+falsepositives:
+    - Designated Instana operations team hosts performing authorized API queries — this rule does not distinguish them from unauthorized hosts and requires analyst triage against the allow-list
+    - Automated monitoring tools with legitimate access to the Instana tenant
+level: medium
+

@@ -1,0 +1,28 @@
+title: XWorm V5.6 Operator Configuration Registry Key Write
+id: 2f4dafdd-6eb9-46f5-9ca6-ea704008f8da
+status: experimental
+description: >-
+    Detects registry write events targeting HKCU\SOFTWARE\XWorm, the key used by XWorm V5.6
+    to store operator-configured values including Telegram bot token, bot ID, and cryptocurrency
+    clipper wallet addresses (BTC, ETH, TRC20). Presence of this key indicates an active or
+    recently active XWorm V5.6 infection on the host.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-74-0-42-25-20260316-detections/
+author: The Hunters Ledger
+date: 2026-03-17
+tags:
+    - attack.defense-impairment
+    - attack.persistence
+    - attack.t1112
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|startswith: 'HKCU\SOFTWARE\XWorm'
+    condition: selection
+falsepositives:
+    - Unlikely — no known legitimate software uses the HKCU\SOFTWARE\XWorm registry key path
+level: high
+

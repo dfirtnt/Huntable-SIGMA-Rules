@@ -1,0 +1,35 @@
+title: CloudSync RAT Tor Hidden Service Staging Under Public Profile
+id: 4a7f8a52-bc79-48d2-8776-550cad2455af
+status: experimental
+description: >-
+    Detects file creation consistent with CloudSync standing up a per-victim Tor
+    hidden service from a working directory under the shared Public profile, a
+    masqueraded Tor binary named taskhostw.exe, or any file written inside a
+    hidden_service subdirectory of C:\Users\Public\. The build-variant working
+    directory name (fs vs filesystem) is not required; the anchor is the Public-path
+    root paired with the Tor hidden-service artifact.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.command-and-control
+    - attack.t1090.003
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_taskhostw:
+        TargetFilename|contains: '\Users\Public\'
+        TargetFilename|endswith: '\taskhostw.exe'
+    selection_hiddensvc:
+        TargetFilename|contains|all:
+            - '\Users\Public\'
+            - '\hidden_service\'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely, legitimate software does not write an executable named taskhostw.exe or create a hidden_service directory under the shared Public profile
+level: high
+

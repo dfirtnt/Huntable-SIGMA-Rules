@@ -1,0 +1,34 @@
+title: Remote Scheduled Task Creation Running As SYSTEM
+id: 95400021-9144-4baf-9e25-6519fe2ef868
+status: experimental
+description: >-
+    Detects creation of a scheduled task on a remote host running as SYSTEM via schtasks with
+    the remote server and run-as SYSTEM flags. The GOCLOUD Windows worm registers a SYSTEM task
+    on each freshly reached LAN host and immediately runs it to spread the miner.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/gocloud-multiservice-cryptojacking-149-28-112-221-detections/
+author: The Hunters Ledger
+date: 2026-07-26
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_create:
+        CommandLine|contains: '/create'
+    selection_remote:
+        CommandLine|contains: '/s '
+    selection_system:
+        CommandLine|contains: '/ru SYSTEM'
+    condition: all of selection_*
+falsepositives:
+    - Enterprise administration tools that provision SYSTEM scheduled tasks on remote hosts
+level: high
+

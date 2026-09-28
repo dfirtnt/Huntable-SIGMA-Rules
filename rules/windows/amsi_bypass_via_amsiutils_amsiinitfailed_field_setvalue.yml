@@ -1,0 +1,33 @@
+title: AMSI Bypass Via AmsiUtils AmsiInitFailed Field SetValue
+id: f539cc09-bd50-4675-9119-08c09fb2ac24
+status: experimental
+description: >-
+    Detects a PowerShell command that reflects into the AmsiUtils type and calls
+    SetValue against a non-public static field to blind in-process AMSI scanning.
+    Matched on the amsiInitFailed field name and the SetValue/NonPublic reflection
+    call shape rather than the AmsiUtils type-name string, since the deployment stub
+    observed in this campaign constructs that type name from a reversed string
+    literal specifically to evade signature matching on the literal "AmsiUtils"
+    substring.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+    - https://s3cur3th1ssh1t.github.io/Bypass_AMSI_by_manual_modification/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'amsiInitFailed'
+            - 'SetValue'
+            - 'NonPublic'
+    condition: selection
+falsepositives:
+    - Unlikely, legitimate scripts do not reflectively clear the AMSI initialization-failed field
+level: high
+

@@ -1,0 +1,39 @@
+title: node.exe Executing From A Vendor-Masquerading LOCALAPPDATA Path
+id: fd1ec736-e0fc-4440-a5c9-c6ec26246108
+status: experimental
+description: >-
+  Detects node.exe running from a %LOCALAPPDATA% subdirectory named after a well-known
+  vendor (Google, Microsoft, Windows, Extensions, Components, Modules, Packages, Programs,
+  Services, or Assemblies), the masquerading path this campaign's Node.js bot uses to blend
+  its runtime into a user profile with no legitimate development toolchain.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging that populates Image, for example Sysmon EID 1 or Security EID 4688.'
+detection:
+    selection_image:
+        Image|endswith: '\node.exe'
+    selection_path:
+        Image|contains:
+            - '\AppData\Local\Google\'
+            - '\AppData\Local\Microsoft\'
+            - '\AppData\Local\Windows\'
+            - '\AppData\Local\Extensions\'
+            - '\AppData\Local\Components\'
+            - '\AppData\Local\Modules\'
+            - '\AppData\Local\Packages\'
+            - '\AppData\Local\Programs\'
+            - '\AppData\Local\Services\'
+            - '\AppData\Local\Assemblies\'
+    condition: selection_image and selection_path
+falsepositives:
+    - A legitimate per-user vendor product that bundles its own Node.js runtime under one of these directory names
+level: high
+

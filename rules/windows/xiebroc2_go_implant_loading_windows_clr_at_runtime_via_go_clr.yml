@@ -1,0 +1,53 @@
+title: XiebroC2 Go Implant Loading Windows CLR at Runtime via Go-Clr
+id: a3f7c821-5e4b-4d09-bc21-7f3a9e5c8d04
+status: experimental
+description: >-
+  Detects a Go binary (main.exe) loading mscoree.dll or clr.dll at runtime,
+  the behavioral signature of the XiebroC2 v3.1 inline-assembly command
+  executing via the vendored go-clr library to host the Windows CLR
+  in-process. Legitimate Go binaries do not host the CLR. This event fires
+  regardless of whether the .NET assembly payload was written to disk,
+  making it effective against fully fileless .NET delivery chains.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-193-56-255-154-20260403-detections/
+    - https://github.com/Ne0nd0g/go-clr
+author: The Hunters Ledger
+date: 2026-04-03
+tags:
+    - attack.stealth
+    - attack.execution
+    - attack.t1620
+    - detection.emerging-threats
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\mscoree.dll'
+            - '\clr.dll'
+    filter_legitimate_dotnet_hosts:
+        Image|endswith:
+            - '\dotnet.exe'
+            - '\msbuild.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\csc.exe'
+            - '\vbc.exe'
+            - '\cmstp.exe'
+            - '\installutil.exe'
+            - '\regsvcs.exe'
+            - '\regasm.exe'
+            - '\mscorsvw.exe'
+            - '\ngen.exe'
+            - '\clrjit.dll'
+            - '\dfsvc.exe'
+            - '\ieinstal.exe'
+            - '\PresentationHost.exe'
+    condition: selection and not filter_legitimate_dotnet_hosts
+falsepositives:
+    - Legitimate applications built with Go that embed .NET interop via documented COM interop mechanisms (rare but possible in enterprise software)
+    - Custom in-house Go tooling that intentionally hosts the CLR for legitimate automation purposes
+    - Security research tools or red team frameworks other than XiebroC2 that use go-clr
+level: high
+

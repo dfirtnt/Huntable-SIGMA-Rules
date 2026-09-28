@@ -6,3 +6,6 @@ sigma-cli==3.1.0
 pySigma-validators-sigmahq==0.21.0
 yamllint==1.37.1
 PyYAML==6.0.3
+# pyparsing 3.3.x crashes `sigma check` on some conditions (TypeError: 'str'
+# object is not callable). Unpin only after pySigma supports it.
+pyparsing==3.2.5

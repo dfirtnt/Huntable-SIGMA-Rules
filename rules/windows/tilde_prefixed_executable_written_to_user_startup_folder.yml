@@ -1,0 +1,30 @@
+title: Tilde Prefixed Executable Written To User Startup Folder
+id: 818f62ed-fba7-4252-97fd-234961f88eb5
+status: experimental
+description: >-
+    Detects an executable with a tilde-prefixed filename written directly into a
+    user's Startup folder. Broader and weaker in isolation than the paired
+    SystemUpdate Run-key rule in this set, some installers briefly use
+    tilde-prefixed temp names, though rarely inside the Startup folder itself, so
+    this is intended for hunting and triage rather than standalone alerting.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\Start Menu\Programs\Startup\~'
+        TargetFilename|endswith: '.exe'
+    condition: selection
+falsepositives:
+    - Installer temp-extraction artifacts that transiently use tilde-prefixed names
+    - Legitimate portable applications that place a randomly-named launcher shortcut in Startup
+level: medium
+

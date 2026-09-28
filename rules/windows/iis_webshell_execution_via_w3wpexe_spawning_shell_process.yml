@@ -1,0 +1,36 @@
+title: IIS Webshell Execution via w3wp.exe Spawning Shell Process
+id: bb2d9a6a-be5b-47e2-9902-ebbdc4831aa6
+status: experimental
+description: >-
+  Detects IIS worker process (w3wp.exe) spawning cmd.exe or wscript.exe, which
+  indicates webshell-based command execution. In the FlaskC2-PostEx-Toolkit
+  campaign, both miss.asp (Ghost xiao-zu ASP webshell via WScript.Shell) and
+  NPCInfoList1.aspx (Godzilla-style .NET loader) run under w3wp.exe and can
+  spawn shell processes when executing operator commands.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/flaskc2-postex-toolkit-67-215-232-25-detections/
+author: The Hunters Ledger
+date: '2026-06-12'
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.execution
+    - attack.t1059.003
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\w3wp.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\powershell.exe'
+    condition: selection
+falsepositives:
+    - Legacy web applications that intentionally invoke shell processes — baseline expected patterns
+    - Authorized IIS management scripts running under the application pool identity
+level: high
+

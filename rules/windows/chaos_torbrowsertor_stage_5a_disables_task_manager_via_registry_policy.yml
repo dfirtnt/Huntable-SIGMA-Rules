@@ -1,0 +1,41 @@
+title: Chaos TorBrowserTor Stage-5a Disables Task Manager via Registry Policy
+id: f1d4a8c3-7e2b-4f9a-b8d6-4a3c7f1e9b52
+status: experimental
+description: >-
+  Detects Stage-5a Chaos/TorBrowserTor ransomware writing DisableTaskMgr=1
+  to HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System to
+  prevent the victim from using Task Manager to terminate the ransomware
+  process. This value can be set legitimately by Group Policy; however,
+  when written by a process running from %APPDATA% outside of a GPO
+  context, it indicates active ransomware defense impairment. Correlate
+  the writing process image path with %APPDATA% to confirm malicious
+  origin.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Policies\System\DisableTaskMgr'
+        Details: 1
+    filter_gpo:
+        Image|contains:
+            - '\Windows\System32\svchost.exe'
+            - '\Windows\System32\GroupPolicy'
+    condition: selection and not filter_gpo
+falsepositives:
+    - >-
+      Group Policy enforcing kiosk or restricted desktop configurations
+      that disable Task Manager
+    - >-
+      Enterprise endpoint management software applying policy-based
+      restrictions through a deployment path not covered by filter_gpo
+level: medium
+

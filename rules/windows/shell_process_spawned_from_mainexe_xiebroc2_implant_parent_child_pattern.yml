@@ -1,0 +1,40 @@
+title: Shell Process Spawned from main.exe (XiebroC2 Implant Parent-Child Pattern)
+id: c5e1f730-8b24-4c9d-a2e7-3f6b8d1e5c92
+status: experimental
+description: >-
+  Detects a cmd.exe, powershell.exe, or pwsh.exe child process spawned from
+  a parent process named main.exe, the parent-child pattern produced when
+  the XiebroC2 v3.1 Go implant executes its shell, OSshell, or
+  OSpowershell commands. Static and behavioral analysis of the implant
+  indicates these shells are spawned with a hidden window
+  (CREATE_NO_WINDOW), but Sysmon process-creation telemetry does not
+  expose window-visibility flags, so this rule anchors on the parent-child
+  relationship alone. main.exe is a common generic filename also produced
+  by legitimate Go/Rust/C build tooling, so this is a Hunting-tier lead
+  requiring analyst triage, not a high-confidence alert.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-193-56-255-154-20260403-detections/
+author: The Hunters Ledger
+date: 2026-04-03
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1059.003
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\main.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    condition: selection_parent and selection_child
+falsepositives:
+    - Legitimate Go-based tooling or software distribution systems named main.exe that spawn shell subprocesses as part of normal operation
+    - Development or build environments where a Go binary named main.exe orchestrates build steps via cmd.exe
+level: medium
+

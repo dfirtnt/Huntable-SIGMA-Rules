@@ -1,0 +1,26 @@
+title: File Named svchost.log Created In Roaming AppData
+id: fd7f5f03-27e5-45ab-af81-f8be388e8b5e
+status: experimental
+description: >-
+  Detects creation of a file literally named svchost.log inside a user's roaming AppData
+  profile, an operator artifact that borrows a system-process name for a log file in a
+  location no legitimate svchost.exe activity ever writes to.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.stealth
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: windows
+    definition: 'Requires Sysmon Event ID 11 (FileCreate) or equivalent EDR file-creation telemetry.'
+detection:
+    selection:
+        TargetFilename|endswith: '\AppData\Roaming\svchost.log'
+    condition: selection
+falsepositives:
+    - Unknown. No legitimate application is known to name a roaming-profile log file svchost.log.
+level: high
+

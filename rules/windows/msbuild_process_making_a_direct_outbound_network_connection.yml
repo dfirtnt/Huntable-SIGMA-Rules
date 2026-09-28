@@ -1,0 +1,29 @@
+title: MSBuild Process Making a Direct Outbound Network Connection
+id: 9629ebb5-35e9-4e2c-b209-c66eee51f0ea
+status: experimental
+description: >-
+    Detects MSBuild.exe itself initiating an outbound TCP connection. MSBuild does
+    not make direct network connections as part of normal build activity (NuGet
+    restore and package operations run through separate client processes); an
+    outbound connection from MSBuild.exe is consistent with a RAT running inside an
+    injected MSBuild process beaconing to its command-and-control server.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.stealth
+    - attack.execution
+    - attack.t1127.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\MSBuild.exe'
+        Initiated: 'true'
+    condition: selection
+falsepositives:
+    - Unknown, MSBuild network activity is rare in normal build environments but has not been exhaustively surveyed across all CI configurations
+level: high
+

@@ -1,0 +1,32 @@
+title: MSSQL CLR Backdoor Execution via sqlservr.exe Child cmd.exe
+id: 124c3140-63a5-4f3c-9700-c3893edd971b
+status: experimental
+description: >-
+  Detects cmd.exe spawned as a child of sqlservr.exe, indicating execution of a
+  SQL Server CLR stored procedure that runs shell commands. This is the primary
+  behavioral signature of the cmd_exec.dll MSSQL CLR reverse-shell backdoor,
+  which evades generic sandboxes and most AV engines.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/flaskc2-postex-toolkit-67-215-232-25-detections/
+    - https://github.com/evi1ox/MSSQL_BackDoor
+author: The Hunters Ledger
+date: '2026-06-12'
+tags:
+    - attack.persistence
+    - attack.t1505.001
+    - attack.execution
+    - attack.t1059.003
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\sqlservr.exe'
+        Image|endswith: '\cmd.exe'
+    condition: selection
+falsepositives:
+    - Legitimate administrative use of xp_cmdshell — baseline and exclude authorized instances
+    - SQL Server maintenance jobs that intentionally invoke cmd.exe via CLR or job steps
+level: high
+

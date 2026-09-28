@@ -1,0 +1,36 @@
+title: WMI Win32_ComputerSystem Query from User-Writable Directory
+id: e82e90ce-c1fd-46df-83af-91d73094a63f
+status: experimental
+description: |
+    Detects WMI queries referencing Win32_ComputerSystem originating from a process whose parent
+    executable resides in a user-writable directory (AppData or Temp). XWorm 3.0-5.0 queries
+    Win32_ComputerSystem at startup to check the Manufacturer and Model fields for virtual machine
+    indicators (VMware, VirtualBox, Hyper-V strings). This is one of six anti-analysis checks
+    performed before any malicious behavior executes. Legitimate WMI inventory tools run from
+    managed system paths, not user-writable locations.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.stealth
+    - attack.discovery
+    - attack.t1497.001
+    - attack.t1082
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_wmi:
+        CommandLine|contains: 'Win32_ComputerSystem'
+    selection_suspicious:
+        ParentImage|contains:
+            - '\AppData\Roaming\'
+            - '\AppData\Local\Temp\'
+    condition: selection_wmi and selection_suspicious
+falsepositives:
+    - Legitimate system inventory or asset management tools running WMI queries from user-writable paths (unusual but possible in portable tool deployments)
+    - IT automation scripts placed in AppData by software deployment systems
+level: medium
+

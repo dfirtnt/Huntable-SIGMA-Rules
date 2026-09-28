@@ -1,0 +1,48 @@
+title: HijackLoader Operator Persistence Directory adv_ctrl Created Under ProgramData
+id: f2a85c3d-16b7-4e09-a74f-3c9b7d2e8a15
+status: experimental
+description: >-
+  Detects creation of the operator-codename persistence directory adv_ctrl
+  under C:\ProgramData\ or %APPDATA%\, used by the HijackLoader/Penguish/Rugmi
+  campaign to stage the Crisp.exe side-load host and the WVault.exe hollow
+  host, and to receive a Windows Defender real-time exclusion. The codename
+  adv_ctrl is one of several operator persistence directory names observed
+  across campaign variants (others: brokerbg, exttracer_net48,
+  thread_adapter, Sulfathiazole) — a sixth wave will very likely introduce
+  a new, uncovered codename.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.persistence
+    - attack.stealth
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_adv_ctrl:
+        TargetFilename|contains: '\adv_ctrl\'
+        TargetFilename|startswith:
+            - 'C:\ProgramData\'
+            - 'C:\Users\'
+    selection_siblings:
+        TargetFilename|contains:
+            - '\brokerbg\'
+            - '\exttracer_net48\'
+            - '\thread_adapter\'
+            - '\Sulfathiazole\'
+        TargetFilename|startswith:
+            - 'C:\ProgramData\'
+            - 'C:\Users\'
+    condition: selection_adv_ctrl or selection_siblings
+falsepositives:
+    - >-
+      Legitimate software installers that coincidentally use a directory
+      named adv_ctrl (extremely unlikely — this is a distinctive operator
+      codename, not a standard Windows or common third-party path component)
+    - Security tools or EDR agents using similarly named directories for internal state
+level: medium
+

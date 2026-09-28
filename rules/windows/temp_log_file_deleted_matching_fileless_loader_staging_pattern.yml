@@ -1,0 +1,28 @@
+title: Temp Log File Deleted Matching Fileless Loader Staging Pattern
+id: b237faa4-ae89-4f42-b5c7-d6c2d8b7f15b
+status: experimental
+description: >-
+    Detects deletion of a temp file named "log_<digits>_<digits>" from the user's
+    Temp folder. The fileless .NET RAT loader decrypts its staged payload into a
+    file of this name, reads it back into memory with PowerShell, then deletes it as
+    anti-forensic cleanup, a temp file of this exact naming shape is not a pattern
+    used by common legitimate logging utilities.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.stealth
+    - attack.t1070.004
+logsource:
+    category: file_delete
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\Temp\log_'
+        TargetFilename|re: '_[0-9]+_[0-9]+$'
+    condition: selection
+falsepositives:
+    - Unknown, a coincidental temp filename matching the log_<digits>_<digits> shape from unrelated software has not been surveyed
+level: high
+

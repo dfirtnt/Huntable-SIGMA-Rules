@@ -1,0 +1,36 @@
+title: Windows Firewall Disabled via Netsh Opmode Command
+id: d7b42f19-3a58-4c82-9e31-0f5b8c2a6d94
+status: experimental
+description: |
+    Detects Windows Firewall being disabled via netsh.exe using the "firewall set opmode disable"
+    command sequence. Shadow RAT v2.6.4.0 includes explicit firewall disable capability in its
+    command handler set, allowing operators to suppress host-based network filtering to enable
+    unrestricted C2 communication or lateral movement. This command disables all Windows Firewall
+    profiles simultaneously and is rarely issued in managed enterprise environments outside of
+    explicit maintenance windows.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.defense-impairment
+    - attack.t1686.003
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - 'firewall'
+            - 'set'
+            - 'opmode'
+            - 'disable'
+    condition: selection
+falsepositives:
+    - Legitimate administrators disabling Windows Firewall during planned maintenance or network reconfiguration
+    - IT automation scripts that manage firewall state as part of policy enforcement workflows
+    - Software installers that temporarily disable the firewall during service installation
+level: medium
+

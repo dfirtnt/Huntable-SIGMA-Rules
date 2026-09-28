@@ -1,0 +1,28 @@
+title: ASPX File Written to IIS aspnet_client Directory
+id: da35ea9d-176c-412e-9325-3df4f98a7033
+status: experimental
+description: >-
+    Detects creation of an .aspx file inside an IIS aspnet_client directory. This
+    path is reserved for a fixed set of Microsoft-shipped ASP.NET AJAX support
+    files, not for uploaded or authored pages, any new .aspx file there is
+    consistent with a web shell drop. Observed with the Sharp4WebCmd command-console
+    web shell, dropped as the first stage of a post-compromise orchestrator tool.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/cloudsync-assembler-toolkit-91-197-98-188-detections/
+author: The Hunters Ledger
+date: 2026-08-03
+tags:
+    - attack.persistence
+    - attack.t1505.003
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\aspnet_client\'
+        TargetFilename|endswith: '.aspx'
+    condition: selection
+falsepositives:
+    - Unlikely, the aspnet_client directory does not normally receive new .aspx files after IIS/ASP.NET installation
+level: high
+

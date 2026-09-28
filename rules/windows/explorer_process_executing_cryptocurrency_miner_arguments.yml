@@ -1,0 +1,31 @@
+title: Explorer Process Executing Cryptocurrency Miner Arguments
+id: 2f7b9c41-6d8e-4a53-b0c7-19e2f5d6a834
+status: experimental
+description: Detects explorer.exe launched with RandomX mining and pool connection
+  arguments, indicating cryptomining activity under a commonly trusted process name.
+references:
+- https://www.huntress.com/blog/threat-actor-compiles-cryptominer
+author: Huntable CTI Studio
+date: '2026-09-24'
+tags:
+- attack.impact
+- attack.t1496
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: \explorer.exe
+  selection_original:
+    OriginalFileName: explorer.exe
+  selection_cli:
+    CommandLine|contains|all:
+    - --cinit-find-x
+    - --algo=
+    - --randomx-mode=
+    - --url=
+    - --cpu-max-threads-hint=
+  condition: (selection_image or selection_original) and selection_cli
+falsepositives:
+- Authorized cryptocurrency mining or benchmark software launched for testing
+level: high

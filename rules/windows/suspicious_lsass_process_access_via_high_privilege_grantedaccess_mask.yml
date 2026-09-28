@@ -1,0 +1,37 @@
+title: Suspicious LSASS Process Access via High-Privilege GrantedAccess Mask
+id: f4e6c9ce-7511-4e5e-9e52-adba3f0ae030
+status: experimental
+description: >-
+  Detects LSASS process access using GrantedAccess masks associated with credential-dumping
+  tooling (0x1010, 0x1410, 0x1fffff). This is the first stage of a sequence observed in the
+  UTA-2026-012 healthcare-victim compromise, where local SAM NTLM hashes were dumped and then
+  exfiltrated via Cloudflare Tunnel C2 — confirmed by the operator's own credential ledger
+  containing plaintext NTLM hashes from two internal subnets. This rule captures only the
+  LSASS-access stage; the follow-on Cloudflare Tunnel egress requires a separate SIEM temporal
+  join (not expressible in a single non-correlation Sigma selection) — see the companion
+  report's Coverage Gaps.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/russian-gemini-credential-mill-213.165.51.115-detections/
+author: The Hunters Ledger
+date: '2026-05-25'
+tags:
+    - attack.credential-access
+    - attack.t1003.001
+    - attack.t1003.002
+    - detection.emerging-threats
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection_lsass_access:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|contains:
+            - '0x1010'
+            - '0x1410'
+            - '0x1fffff'
+    condition: selection_lsass_access
+falsepositives:
+    - Legitimate AV/EDR processes accessing lsass.exe for telemetry — filter by trusted Image paths (CrowdStrike, Defender, Carbon Black sensors)
+    - Domain controller synchronization operations
+level: high
+

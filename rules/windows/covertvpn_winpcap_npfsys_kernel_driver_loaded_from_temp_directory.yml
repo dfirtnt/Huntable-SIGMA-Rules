@@ -1,0 +1,40 @@
+title: CovertVPN WinPcap npf.sys Kernel Driver Loaded from Temp Directory
+id: d9e05a82-6c34-4b77-a1f5-3e8d2c7b4f01
+status: experimental
+description: >-
+  Detects loading of the npf.sys WinPcap kernel driver from a user
+  temporary directory. The Cobalt Strike CovertVPN Layer 2 bridge module
+  embeds WinPcap 4.1.3 components (npf.sys x86 and amd64, wpcap.dll,
+  Packet.dll) in its .data section and installs npf.sys as a kernel
+  driver service from %TEMP% to enable raw packet capture for its ICMP
+  and UDP transport channels. Legitimate WinPcap and Npcap installations
+  place the driver in System32\drivers, not in user temp directories,
+  though some installers do briefly stage there before relocating it.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/new-files-found-20260408-detections/
+author: The Hunters Ledger
+date: 2026-04-08
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1543.003
+    - detection.emerging-threats
+logsource:
+    category: driver_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\npf.sys'
+    filter_legitimate:
+        ImageLoaded|contains:
+            - '\System32\drivers\'
+            - '\SysWOW64\drivers\'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - >-
+      Legitimate WinPcap or Npcap installers that stage npf.sys in a
+      temporary directory before moving it to System32\drivers
+      (uncommon; verify by checking for a subsequent persistent driver
+      installation in System32\drivers)
+level: medium
+

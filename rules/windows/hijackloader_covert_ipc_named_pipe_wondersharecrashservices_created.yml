@@ -1,0 +1,41 @@
+title: HijackLoader Covert IPC Named Pipe WondershareCrashServices Created
+id: 7c9d4b1a-e832-4f67-b52a-901c3d8e5f24
+status: experimental
+description: >-
+  Detects creation of the named pipe \.\pipe\WondershareCrashServices used
+  by the HijackLoader operator-modified ExceptionHandler.dll as a covert
+  inter-process communication channel between loader stages. The pipe name
+  mimics the legitimate Wondershare Breakpad crash-reporting IPC channel
+  but is created by the operator's modified dispatcher DLL (PDB path
+  I:\CompanySource\Plowshare\) to coordinate stage-1 through stage-3
+  execution. Legitimate Wondershare software creates this pipe only from
+  signed Wondershare binaries installed under Program Files.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/opendirectory-62-60-237-100-20260506-detections/
+author: The Hunters Ledger
+date: 2026-05-06
+tags:
+    - attack.stealth
+    - attack.execution
+    - attack.t1036.005
+    - attack.t1559
+    - detection.emerging-threats
+logsource:
+    category: pipe_created
+    product: windows
+detection:
+    selection:
+        PipeName|endswith: '\WondershareCrashServices'
+    filter_legit_wondershare:
+        Image|startswith:
+            - 'C:\Program Files\Wondershare\'
+            - 'C:\Program Files (x86)\Wondershare\'
+    condition: selection and not filter_legit_wondershare
+falsepositives:
+    - >-
+      Legitimate Wondershare DVD Creator or SlideShow Editor installations
+      where ExceptionHandler.dll creates this pipe from a genuine Program
+      Files install path (filtered by the legit Wondershare path exclusion above)
+    - Security testing tools that explicitly simulate Wondershare crash-reporter IPC
+level: medium
+

@@ -1,0 +1,40 @@
+title: Chaos Loader Stage-4 Fileless Payload Written to Masquerade Registry Key
+id: 2d8b4e7f-a3c9-4f6b-b5d2-1e9a7c3f8b04
+status: experimental
+description: >-
+  Detects a registry write to HKLM\Software\Microsoft Defender\Payload,
+  which is the Stage-4 fileless storage location used by the
+  Chaos/TorBrowserTor private crypter. The legitimate Windows Defender
+  registry path is HKLM\Software\Microsoft\Windows Defender (note the
+  extra \Windows\ path level). Stage-4 writes approximately 1.4 MB of
+  encoded payload data to this masquerade key; the boot re-loader reads
+  it back on every system startup. The masquerade path name is
+  attacker-chosen and may rotate in a future build.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/open-directory-94-103-1-13-20260423-detections/
+author: The Hunters Ledger
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.t1112
+    - attack.t1027.011
+    - attack.t1036.005
+    - detection.emerging-threats
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Software\Microsoft Defender\Payload'
+    filter_legitimate:
+        TargetObject|contains: '\Software\Microsoft\Windows Defender\'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - >-
+      No known legitimate software writes to this registry path for THIS
+      build; a future build renaming the masquerade key would evade this
+      rule entirely
+level: medium
+

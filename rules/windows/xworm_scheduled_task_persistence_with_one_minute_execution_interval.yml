@@ -1,0 +1,39 @@
+title: XWorm Scheduled Task Persistence with One-Minute Execution Interval
+id: 94b6c01a-db65-4aa1-82c5-46eebc0c8ee5
+status: experimental
+description: |
+    Detects XWorm 3.0-5.0 creating a scheduled task that runs every one minute at HIGHEST
+    privilege level. This is the most aggressive of XWorm's three redundant persistence
+    mechanisms — the one-minute interval provides near-instant re-execution after process
+    termination and the HIGHEST privilege flag requests elevated execution context. The task
+    name is derived from the install filename (typically "XWormClient") and the action points
+    to the malware binary in %AppData%.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/shadow-xworm-opendirectory-detections/
+author: The Hunters Ledger
+date: '2026-04-04'
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.t1053.005
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmd:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains|all:
+            - '/create'
+            - '/sc minute'
+            - '/mo 1'
+            - '/rl highest'
+    selection_path:
+        CommandLine|contains:
+            - '\AppData\Roaming\'
+    condition: selection_cmd and selection_path
+falsepositives:
+    - No known legitimate software creates one-minute interval scheduled tasks at HIGHEST privilege from AppData
+level: high
+

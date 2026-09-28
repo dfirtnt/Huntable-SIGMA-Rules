@@ -1,0 +1,37 @@
+title: Certutil URLCache Download Or Remote WMIC-Invoked Certutil Download
+id: 934c780a-ed74-45d9-bbe8-c5540ed96f55
+status: experimental
+description: >-
+  Detects certutil invoked with -urlcache -split -f to fetch a remote file, either directly
+  or via a remote wmic process-call-create, the LOLBin ingress-tool-transfer pattern used
+  to stage payloads onto internal hosts from the operator's staging ports.
+references:
+    - https://the-hunters-ledger.com/hunting-detections/sliver-c2-windows-postex-staging-193-233-202-17-detections/
+author: The Hunters Ledger
+date: '2026-09-06'
+tags:
+    - attack.command-and-control
+    - attack.t1105
+    - attack.lateral-movement
+    - attack.t1570
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requires process creation logging that populates CommandLine, for example Sysmon EID 1 or Security EID 4688 with command line auditing enabled.'
+detection:
+    selection_direct:
+        Image|endswith: '\certutil.exe'
+        CommandLine|contains|all:
+            - '-urlcache'
+            - '-split'
+            - '-f'
+    selection_remote:
+        Image|endswith: '\WMIC.exe'
+        CommandLine|contains|all:
+            - 'process call create'
+            - 'certutil'
+    condition: selection_direct or selection_remote
+falsepositives:
+    - Unlikely. certutil -urlcache -split -f has no common legitimate administrative use outside certificate-cache management, which does not use this flag combination.
+level: high
+
