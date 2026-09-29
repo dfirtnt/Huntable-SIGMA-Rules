@@ -1,0 +1,24 @@
+title: Enable Remote Desktop Connections Through Terminal Server Registry Setting
+id: 8f7c66f4-1bc1-41da-9c15-83ccf20b31c7
+status: experimental
+description: Detects a registry modification enabling Remote Desktop connections system-wide,
+  which may facilitate unauthorized remote access.
+references:
+- https://www.huntress.com/blog/komari-c2-agent-abuse
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.lateral-movement
+- attack.t1021.001
+logsource:
+  category: registry_event
+  product: windows
+detection:
+  selection_target:
+    TargetObject|endswith: \SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections
+  selection_data:
+    Details: '0'
+  condition: all of selection_*
+falsepositives:
+- Administrators enabling Remote Desktop for authorized support or server maintenance
+level: medium

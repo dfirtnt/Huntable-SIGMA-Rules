@@ -1,0 +1,28 @@
+title: Domain Administrators Group Enumeration with Net
+id: c327b641-e467-4c1d-9003-f2b7507ed49a
+status: experimental
+description: Detects Net querying the Domain Admins group through the domain context,
+  which can identify privileged accounts for follow-on targeting.
+references:
+- https://thedfirreport.com/2026/06/29/from-bing-search-to-ransomware-bumblebee-and-adaptixc2-deliver-akira-3/
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.discovery
+- attack.t1069.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+  - Image|endswith: \net.exe
+  - OriginalFileName: net.exe
+  selection_cli:
+    CommandLine|contains|all:
+    - group
+    - domain admins
+    - /dom
+  condition: all of selection_*
+falsepositives:
+- Administrators auditing privileged domain group membership
+level: medium

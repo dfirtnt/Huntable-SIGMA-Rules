@@ -1,0 +1,25 @@
+title: Komari Agent Launched by Service Control Manager
+id: c6a3ff6c-9303-42f3-aea4-3f5308ece00a
+status: experimental
+description: Detects komari-agent.exe launched by services.exe, indicating a Komari
+  agent running as a Windows service.
+references:
+- https://www.huntress.com/blog/komari-c2-agent-abuse
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.persistence
+- attack.t1543.003
+- attack.privilege-escalation
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: \komari-agent.exe
+  selection_parent:
+    ParentImage|endswith: \services.exe
+  condition: all of selection_*
+falsepositives:
+- Authorized deployments of the Komari monitoring agent as a Windows service
+level: medium
