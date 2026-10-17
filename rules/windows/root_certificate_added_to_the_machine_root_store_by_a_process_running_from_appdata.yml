@@ -1,0 +1,32 @@
+title: Root Certificate Added to the Machine Root Store by a Process Running From AppData
+id: ba366b18-496e-4ebe-8302-4bb4d305ee2a
+status: experimental
+description: >-
+  Detects a process running from AppData writing a certificate blob under the
+  machine (HKLM, LOCAL_MACHINE) Root certificate store, excluding additions to
+  the current user's Root store. This hunting rule covers root certificate
+  installation associated with the traffic-interception setup of a
+  Steam-focused executable delivered by a ClickFix chain.
+references:
+  - https://the-hunters-ledger.com/hunting-detections/newdouble-clickfix-detections/
+author: The Hunters Ledger
+date: 2026-09-28
+tags:
+  - attack.defense-impairment
+  - attack.t1553.004
+  - detection.emerging-threats
+  - stp.2
+logsource:
+  category: registry_set
+  product: windows
+  definition: 'Requires Sysmon EID 13 (RegistryEvent value set) with the SystemCertificates key path included in the registry monitoring config.'
+detection:
+  selection:
+    TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\SystemCertificates\Root\Certificates\'
+    TargetObject|endswith: '\Blob'
+    Image|contains: '\AppData\'
+  condition: 'selection'
+falsepositives:
+  - Local development tools that create and trust a local certificate authority from a user profile folder
+  - Per-user installers of filtering or inspection software
+level: medium

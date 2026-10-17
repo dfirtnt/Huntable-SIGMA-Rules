@@ -1,0 +1,34 @@
+title: PowerShell WMI Shadow Copy Deletion
+id: 15ac899d-7fd2-4d48-95c7-febc4404ac21
+status: experimental
+description: Detects PowerShell deleting shadow copies through WMI, a recovery-inhibition
+  technique commonly used before ransomware deployment.
+references:
+- https://thedfirreport.com/2026/06/29/from-bing-search-to-ransomware-bumblebee-and-adaptixc2-deliver-akira-3/
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.execution
+- attack.t1059.001
+- attack.impact
+- attack.t1490
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+  - Image|endswith:
+    - \powershell.exe
+    - \pwsh.exe
+  - OriginalFileName:
+    - PowerShell.EXE
+    - pwsh.dll
+  selection_cli:
+    CommandLine|contains|all:
+    - Get-WmiObject
+    - Win32_Shadowcopy
+    - Remove-WmiObject
+  condition: all of selection_*
+falsepositives:
+- Administrators removing obsolete shadow copies as part of storage maintenance
+level: high
