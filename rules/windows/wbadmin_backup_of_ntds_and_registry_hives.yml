@@ -1,0 +1,31 @@
+title: WBAdmin Backup of NTDS and Registry Hives
+id: 6a9e3f28-7bcd-44f1-8a42-bb8e2cf5d19a
+status: experimental
+description: Detects WBAdmin backing up the NTDS database alongside SYSTEM and SECURITY
+  registry hives, a credential-access pattern that can enable offline extraction of
+  domain credentials.
+references:
+- https://thedfirreport.com/2026/06/29/from-bing-search-to-ransomware-bumblebee-and-adaptixc2-deliver-akira-3/
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.credential-access
+- attack.t1003.003
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+  - Image|endswith: \wbadmin.exe
+  - OriginalFileName: WBADMIN.EXE
+  selection_cli:
+    CommandLine|contains|all:
+    - start backup
+    - ntds.dit
+    - \config\SYSTEM
+    - \config\SECURITY
+  condition: all of selection_*
+falsepositives:
+- Administrators performing a documented Active Directory backup or disaster-recovery
+  procedure
+level: high

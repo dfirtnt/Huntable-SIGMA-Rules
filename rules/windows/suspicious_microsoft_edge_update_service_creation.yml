@@ -1,0 +1,25 @@
+title: Suspicious Microsoft Edge Update Service Creation
+id: 52c12c0d-c765-4d95-b20d-0ff74e659f16
+status: experimental
+description: Detects creation of the MicrosoftEdgeUpdateSvc service observed supporting
+  persistent cryptomining activity.
+references:
+- https://www.huntress.com/blog/ahsaycbs-flaws-exploit
+author: Huntable CTI Studio
+date: '2026-10-12'
+tags:
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1543.003
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+    ServiceName: MicrosoftEdgeUpdateSvc
+  condition: selection
+falsepositives:
+- Legitimate Microsoft Edge update service installation or maintenance
+- Software deployment using a similarly named service
+level: medium

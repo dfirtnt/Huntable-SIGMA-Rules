@@ -1,0 +1,24 @@
+title: Certutil Outbound Connection on Uncommon Download Port
+id: 7b4e2d91-6f83-4a1c-b205-d9e7f6c8143a
+status: experimental
+description: Detects certutil.exe making an outbound network connection on an uncommon
+  port, consistent with its use as an ingress tool transfer utility.
+references:
+- https://www.huntress.com/blog/threat-actor-compiles-cryptominer
+author: Huntable CTI Studio
+date: '2026-09-24'
+tags:
+- attack.command-and-control
+- attack.t1105
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Image|endswith: \certutil.exe
+    DestinationPort: 8899
+  condition: selection
+falsepositives:
+- Administrators or software deployment tools retrieving files through a custom internal
+  service
+level: medium

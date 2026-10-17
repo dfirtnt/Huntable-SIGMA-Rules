@@ -1,0 +1,32 @@
+title: WMIC Remote SQL Process Deletion from Host List
+id: 79d0086e-d2c6-46d6-a78c-cf14f93a49fb
+status: experimental
+description: Detects WMIC deleting SQL-related processes across hosts supplied in
+  a node list, which can disrupt services during remote operations.
+references:
+- https://thedfirreport.com/2026/06/29/from-bing-search-to-ransomware-bumblebee-and-adaptixc2-deliver-akira-3/
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.lateral-movement
+- attack.t1047
+- attack.impact
+- attack.t1489
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+  - Image|endswith: \wmic.exe
+  - OriginalFileName: wmic.exe
+  selection_cli:
+    CommandLine|contains|all:
+    - /node:@
+    - process where
+    - CommandLine Like
+    - '%sql%'
+    - delete
+  condition: all of selection_*
+falsepositives:
+- Database administrators remotely terminating hung SQL-related processes during maintenance
+level: high

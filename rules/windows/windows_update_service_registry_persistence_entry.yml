@@ -1,0 +1,26 @@
+title: Windows Update Service Registry Persistence Entry
+id: e29afdda-67bd-4850-a1b3-6f51c5e2a60e
+status: experimental
+description: Detects creation of a Windows service registry entry named Windows Update
+  Service, a persistence mechanism associated with the Komari agent.
+references:
+- https://www.huntress.com/blog/komari-c2-agent-abuse
+author: Huntable CTI Studio
+date: '2026-09-03'
+tags:
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1543.003
+- detection.emerging-threats
+logsource:
+  category: registry_event
+  product: windows
+detection:
+  selection_target:
+    TargetObject|startswith: \REGISTRY\MACHINE\System\CurrentControlSet\Services\Windows
+      Update Service
+  condition: selection_target
+falsepositives:
+- Authorized software deployment or monitoring tools registering a custom service
+  with this name
+level: high
